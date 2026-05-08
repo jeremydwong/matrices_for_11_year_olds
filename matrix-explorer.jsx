@@ -17,8 +17,8 @@ import ch9Md from "./content/ch9-summary.md?raw";
 // Split a chapter's MD file on `# intro` / `# outro` headers.
 // Returns { intro: string, outro: string }, either of which may be empty.
 function splitMd(src) {
-  const sections = { intro: "", outro: "" };
-  const re = /^#\s+(intro|outro)\s*$/gim;
+  const sections = { intro: "", middle: "", outro: "" };
+  const re = /^#\s+(intro|middle|outro)\s*$/gim;
   const matches = [...src.matchAll(re)];
   if (matches.length === 0) {
     sections.intro = src.trim();
@@ -361,8 +361,11 @@ function Ch1() {
         parallel and watch the solution disappear!
       </Callout>
 
+      <Markdown src={CONTENT[1].middle} />
+
       {/* ========== Manual algebra walkthrough ========== */}
       <ManualAlgebraWalkthrough a={a} b={b} c={c} d={d} e={e} f={f} x={x} y={y} det={det} />
+      <InverseWalkthrough a={a} b={b} c={c} d={d} e={e} f={f} x={x} y={y} det={det} />
 
       {/* ========== Ax = b and the matrix inverse ========== */}
       <div style={{ marginTop: 22 }}>
@@ -559,6 +562,224 @@ function MatBracket({ children, col = COLORS.gold }) {
       borderRadius: 3, gap: 2, fontSize: 14, color: col, textAlign: "center", minWidth: 36,
     }}>
       {children}
+    </div>
+  );
+}
+
+function AugMatrix({ r1, r2 }) {
+  const fmt = v => { const r = round(v, 3); return r === 0 ? "0" : String(r); };
+  const cell = { minWidth: 48, textAlign: "right", padding: "0 4px" };
+  return (
+    <div style={{ fontFamily: fonts.mono, fontSize: 13, margin: "6px 0", lineHeight: 2 }}>
+      {[r1, r2].map((row, i) => (
+        <div key={i} style={{ display: "flex", alignItems: "center" }}>
+          <span style={{ color: COLORS.muted }}>│</span>
+          <span style={cell}>{fmt(row[0])}</span>
+          <span style={cell}>{fmt(row[1])}</span>
+          <span style={{ color: COLORS.muted, margin: "0 4px" }}>┊</span>
+          <span style={{ ...cell, color: COLORS.cyan }}>{fmt(row[2])}</span>
+          <span style={{ ...cell, color: COLORS.cyan }}>{fmt(row[3])}</span>
+          <span style={{ color: COLORS.muted }}>│</span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function InverseWalkthrough({ a, b, c, d, e, f, x, y, det }) {
+  const [open, setOpen] = useState(false);
+  const [showAnswer, setShowAnswer] = useState(false);
+
+  const canCompute = Math.abs(det) > 0.001;
+  const needSwap = canCompute && Math.abs(a) < 0.001;
+
+  // After potential swap, work with these starting rows
+  const r1_0 = needSwap ? [d, e, 0, 1] : [a, b, 1, 0];
+  const r2_0 = needSwap ? [a, b, 1, 0] : [d, e, 0, 1];
+
+  // Step 1: R₁ ÷ pivot1
+  const p1 = r1_0[0];
+  const r1_1 = r1_0.map(v => v / p1);
+  const r2_1 = r2_0;
+
+  // Step 2: R₂ − factor × R₁
+  const f1 = r2_1[0];
+  const r1_2 = r1_1;
+  const r2_2 = r2_1.map((v, i) => v - f1 * r1_1[i]);
+
+  // Step 3: R₂ ÷ pivot2
+  const p2 = r2_2[1];
+  const r1_3 = r1_2;
+  const r2_3 = r2_2.map(v => v / p2);
+
+  // Step 4: R₁ − factor × R₂
+  const f2 = r1_3[1];
+  const r1_4 = r1_3.map((v, i) => v - f2 * r2_3[i]);
+  const r2_4 = r2_3;
+
+  const inv = [[r1_4[2], r1_4[3]], [r2_4[2], r2_4[3]]];
+  const R = v => round(v, 3);
+
+  const elimLabel = (factor) => {
+    if (factor < 0) return `+ ${R(Math.abs(factor))}`;
+    return `− ${R(factor)}`;
+  };
+
+  return (
+    <div style={{
+      marginTop: 18, border: `1px solid ${COLORS.border}`,
+      borderRadius: 8, overflow: "hidden",
+    }}>
+      <button onClick={() => setOpen(!open)}
+        style={{
+          width: "100%", textAlign: "left",
+          padding: "10px 14px", background: COLORS.surfaceLight,
+          border: "none", borderBottom: open ? `1px solid ${COLORS.border}` : "none",
+          color: COLORS.text, fontFamily: "inherit", fontSize: 13, cursor: "pointer",
+          display: "flex", justifyContent: "space-between", alignItems: "center",
+        }}>
+        <span>
+          <span style={{ color: COLORS.purple, fontWeight: 700, marginRight: 8 }}>{open ? "▾" : "▸"}</span>
+          Finding A⁻¹ by row reduction — the matrix way to solve this.
+        </span>
+        <span style={{ color: COLORS.muted, fontSize: 11, fontFamily: fonts.mono }}>
+          {open ? "hide" : "show"}
+        </span>
+      </button>
+
+      {open && (
+        <div style={{ padding: "14px 16px", fontSize: 13, lineHeight: 1.8 }}>
+          {!canCompute ? (
+            <Prose>
+              The determinant is zero, so <b>A</b> has no inverse — you can't undo this matrix.
+              The two equations represent parallel lines (or the same line), and there's no single
+              crossing point to find.
+            </Prose>
+          ) : (
+            <div>
+              <Prose>
+                The idea: write the matrix <b>A</b> side-by-side with the <b>identity matrix</b> (the
+                do-nothing matrix — ones on the diagonal, zeros everywhere else). Then use row
+                operations to turn <b>A</b> into the identity. Whatever those same operations do to the
+                identity side gives you <b>A⁻¹</b>.
+              </Prose>
+
+              <StepList>
+                <Step n={1} label="Write [A | I] — the augmented matrix">
+                  {needSwap && (
+                    <>
+                      <AugMatrix r1={[a, b, 1, 0]} r2={[d, e, 0, 1]} />
+                      <div style={{ color: COLORS.muted, fontSize: 11, fontStyle: "italic", margin: "4px 0" }}>
+                        The top-left is zero, so swap the rows first:
+                      </div>
+                    </>
+                  )}
+                  <AugMatrix r1={r1_0} r2={r2_0} />
+                </Step>
+
+                <Step n={2} label={`R₁ → R₁ ÷ ${R(p1)}  (make the top-left entry 1)`}>
+                  <AugMatrix r1={r1_1} r2={r2_1} />
+                </Step>
+
+                <Step n={3} label={`R₂ → R₂ ${elimLabel(f1)} × R₁  (zero out the entry below)`}>
+                  <AugMatrix r1={r1_2} r2={r2_2} />
+                </Step>
+
+                <Step n={4} label={`R₂ → R₂ ÷ ${R(p2)}  (make the bottom-right entry 1)`}>
+                  <AugMatrix r1={r1_3} r2={r2_3} />
+                </Step>
+
+                <Step n={5} label={`R₁ → R₁ ${elimLabel(f2)} × R₂  (zero out the entry above)`}>
+                  <AugMatrix r1={r1_4} r2={r2_4} />
+                </Step>
+              </StepList>
+
+              <Prose>
+                The left side is now the identity. The right side — the <span style={{ color: COLORS.cyan }}>blue numbers</span> — is <b>A⁻¹</b>.
+              </Prose>
+
+              <div style={{
+                marginTop: 8, padding: "10px 12px",
+                background: `${COLORS.purple}10`, border: `1px solid ${COLORS.purple}40`,
+                borderRadius: 6,
+              }}>
+                <div style={{
+                  fontSize: 11, color: COLORS.purple, textTransform: "uppercase",
+                  letterSpacing: 1, marginBottom: 6, fontFamily: fonts.mono,
+                }}>The inverse</div>
+                <MathBlock>
+                  <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                    <span>A⁻¹ =</span>
+                    <MatBracket col={COLORS.purple}>
+                      <div>{R(inv[0][0])}{"  "}{R(inv[0][1])}</div>
+                      <div>{R(inv[1][0])}{"  "}{R(inv[1][1])}</div>
+                    </MatBracket>
+                  </div>
+                </MathBlock>
+              </div>
+
+              <div style={{
+                marginTop: 10, padding: "10px 12px",
+                background: `${COLORS.green}10`, border: `1px solid ${COLORS.green}40`,
+                borderRadius: 6,
+              }}>
+                <div style={{
+                  fontSize: 11, color: COLORS.green, textTransform: "uppercase",
+                  letterSpacing: 1, marginBottom: 6, fontFamily: fonts.mono,
+                }}>Multiply A⁻¹ × b to get the answer</div>
+                <div style={{ fontFamily: fonts.mono, fontSize: 13 }}>
+                  <Eq>x = {R(inv[0][0])}·{c} + {R(inv[0][1])}·{f} = <b style={{ color: COLORS.green }}>{R(x)}</b></Eq>
+                  <Eq>y = {R(inv[1][0])}·{c} + {R(inv[1][1])}·{f} = <b style={{ color: COLORS.green }}>{R(y)}</b></Eq>
+                </div>
+              </div>
+
+              <div style={{
+                marginTop: 16, padding: "12px 14px",
+                background: `${COLORS.gold}08`, border: `1px solid ${COLORS.gold}30`,
+                borderRadius: 6,
+              }}>
+                <div style={{
+                  fontSize: 11, color: COLORS.gold, textTransform: "uppercase",
+                  letterSpacing: 1.5, marginBottom: 8, fontFamily: fonts.mono, fontWeight: 700,
+                }}>✎ Try it yourself</div>
+                <Prose>
+                  Use the same steps to find the inverse and solve this one by hand:
+                </Prose>
+                <MathBlock>
+                  <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                    <MatBracket><div>2{"  "}1</div><div>1{"  "}3</div></MatBracket>
+                    <MatBracket col={COLORS.cyan}><div>x</div><div>y</div></MatBracket>
+                    <span style={{ color: COLORS.text }}>=</span>
+                    <MatBracket col={COLORS.magenta}><div>5</div><div>5</div></MatBracket>
+                  </div>
+                </MathBlock>
+                <Prose>
+                  Hints: the determinant is 2·3 − 1·1 = <b>5</b>. You'll need four row operations.
+                </Prose>
+                <button onClick={() => setShowAnswer(!showAnswer)}
+                  style={{
+                    marginTop: 6, padding: "6px 12px", background: COLORS.surfaceLight,
+                    border: `1px solid ${COLORS.border}`, borderRadius: 4,
+                    color: COLORS.gold, fontFamily: fonts.mono, fontSize: 11,
+                    cursor: "pointer", letterSpacing: 0.5,
+                  }}>
+                  {showAnswer ? "hide answer" : "show answer"}
+                </button>
+                {showAnswer && (
+                  <div style={{ marginTop: 10 }}>
+                    <div style={{ fontFamily: fonts.mono, fontSize: 12, color: COLORS.text, lineHeight: 2 }}>
+                      <div>A⁻¹ = <span style={{ color: COLORS.purple }}>[0.6, −0.2; −0.2, 0.4]</span></div>
+                      <div>x = 0.6·5 + (−0.2)·5 = <b style={{ color: COLORS.green }}>2</b></div>
+                      <div>y = (−0.2)·5 + 0.4·5 = <b style={{ color: COLORS.green }}>1</b></div>
+                      <div style={{ color: COLORS.muted, fontSize: 11, marginTop: 4 }}>Check: 2(2)+1(1) = 5 ✓ , 1(2)+3(1) = 5 ✓</div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }

@@ -11,6 +11,31 @@ Critically, try a few important ones to find a few interesting ones!
 2. where the two equations are equal
 3. where the two lines are parallel and so they do not touch!
 
+# middle
+
+## How matrix multiplication works
+
+So how does the matrix "contain" those two equations? There's a rule — **matrix multiplication** — and it's worth memorizing because it's the same rule every time, forever. It's weird, sort of. But you only have to learn it once, and trust me it's easy and sort of satisfying.
+
+:::definition
+To multiply a matrix by another matrix (or vector): take one **row** of the matrix, go across it left to right, and multiply each entry by the matching entry going **down** a column vector (or in our case with the xs and ys, just the vector itself. A Vector is just like an Nx1 matrix, really, where N is the number of rows). Add those products together. That gives you one number in the result. Repeat for every row.
+
+Note then that this gives you a check to see if that multiplication even makes any sense! the middle two dimensions of two matrices have to be the same, or you can't multiply them. 
+:::playful
+Across the row, down the column, multiply and add. Each row produces one number in the answer.
+:::end
+
+Let's see how it recovers our equations. Suppose the matrix holds the coefficients, and the vector holds our unknowns x and y:
+
+- **Row 1**: go across — you pick up the first coefficient times x, plus the second coefficient times y. That sum equals the first entry on the right-hand side. That's just our first equation, written out!
+- **Row 2**: same idea — across the second row, down the same vector. You get the second equation back.
+
+So matrix multiplication is the bridge between the compact grid and the pair of equations you started with. The two notations say exactly the same thing. The matrix form is just tidier — and once you have a rule for multiplying, you can start *inverting* the process to solve for x and y directly.
+
+:::callout color=muted
+This "across-and-down" rule also works for multiplying two full matrices together (not just a matrix times a vector). Each row of the left matrix gets paired with each column of the right matrix. We'll see that later — for now, one column (a vector) is enough.
+:::end
+
 # outro
 
 Now you can state the whole game cleanly. The compact form **Ax = b** -- note this is sort of a different meaning of **x**, to just stand-in for __any__ kind of variable -- and captures any system of simple (linear) relationships. Solving means finding **x = A⁻¹b** — one matrix multiplication. Computers have a systematic way of getting that A⁻¹ , which means that our goal shifts from doing the manual variable substitutions by hand towards just writing down the relationship as a matrix. This is still where the most important understanding is: correctly interpreting the true statements as equations. 
