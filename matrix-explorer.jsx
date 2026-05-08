@@ -47,22 +47,7 @@ const CONTENT = {
   9: splitMd(ch9Md),
 };
 
-const COLORS = {
-  bg: "#0c0c18",
-  surface: "#141428",
-  surfaceLight: "#1e1e3a",
-  border: "#2a2a50",
-  text: "#e4e4f0",
-  muted: "#7878a0",
-  cyan: "#00d4ff",
-  magenta: "#ff4d8d",
-  gold: "#ffc44d",
-  green: "#4ddb7a",
-  orange: "#ff8844",
-  purple: "#aa66ff",
-  grid: "rgba(80,80,180,0.12)",
-  gridAxis: "rgba(120,120,200,0.3)",
-};
+import { colors as COLORS, fonts } from "./theme.js";
 
 // --- UTILITIES ---
 const m2s = (x, y, w, h, xR, yR) => [
@@ -104,7 +89,7 @@ function Slider({ label, value, onChange, min = -3, max = 3, step = 0.1, color =
     }}>
       <span style={{
         flex: "0 0 auto",
-        color, fontFamily: "'Space Mono', monospace",
+        color, fontFamily: fonts.mono,
         fontWeight: 700, fontSize: 12,
       }}>{label}</span>
       <input type="range" min={min} max={max} step={step} value={value}
@@ -119,7 +104,7 @@ function Slider({ label, value, onChange, min = -3, max = 3, step = 0.1, color =
           width: 42, padding: "3px 5px",
           background: COLORS.surfaceLight,
           border: `1px solid ${COLORS.border}`, borderRadius: 4,
-          color: COLORS.text, fontFamily: "'Space Mono', monospace", fontSize: 11,
+          color: COLORS.text, fontFamily: fonts.mono, fontSize: 11,
           textAlign: "center", outline: "none",
         }} />
     </label>
@@ -130,7 +115,7 @@ function MathBlock({ children }) {
   return (
     <div style={{
       background: COLORS.surfaceLight, border: `1px solid ${COLORS.border}`,
-      borderRadius: 8, padding: "12px 16px", fontFamily: "'Space Mono', monospace",
+      borderRadius: 8, padding: "12px 16px", fontFamily: fonts.mono,
       fontSize: 14, color: COLORS.gold, margin: "10px 0", overflowX: "auto",
       lineHeight: 1.6,
     }}>
@@ -212,12 +197,12 @@ function Ch1() {
         <div style={{ flex: 1, minWidth: 200 }}>
           <div style={{ fontSize: 12, color: COLORS.muted, marginBottom: 8, textTransform: "uppercase", letterSpacing: 1 }}>Equations</div>
           <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 4, fontFamily: "'Space Mono', monospace", fontSize: 14, color: COLORS.text }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 4, fontFamily: fonts.mono, fontSize: 14, color: COLORS.text }}>
               <input type="number" value={a} onChange={e => setA(+e.target.value)} style={inputStyle} />x +
               <input type="number" value={b} onChange={e => setB(+e.target.value)} style={inputStyle} />y =
               <input type="number" value={c} onChange={e => setC(+e.target.value)} style={inputStyle} />
             </div>
-            <div style={{ display: "flex", alignItems: "center", gap: 4, fontFamily: "'Space Mono', monospace", fontSize: 14, color: COLORS.text }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 4, fontFamily: fonts.mono, fontSize: 14, color: COLORS.text }}>
               <input type="number" value={d} onChange={e => setD(+e.target.value)} style={inputStyle} />x +
               <input type="number" value={e} onChange={e => setE(+e.target.value)} style={inputStyle} />y =
               <input type="number" value={f} onChange={e => setF(+e.target.value)} style={inputStyle} />
@@ -252,7 +237,7 @@ function Ch1() {
           background: `${COLORS.green}15`, border: `1px solid ${COLORS.green}40`,
           borderRadius: 8, padding: "12px 16px", margin: "12px 0",
         }}>
-          <span style={{ color: COLORS.green, fontFamily: "'Space Mono', monospace", fontSize: 14 }}>
+          <span style={{ color: COLORS.green, fontFamily: fonts.mono, fontSize: 14 }}>
             Solution: x = {round(x)}, y = {round(y)}
           </span>
           <div style={{ color: COLORS.muted, fontSize: 12, marginTop: 4 }}>
@@ -264,7 +249,7 @@ function Ch1() {
           background: `${COLORS.magenta}15`, border: `1px solid ${COLORS.magenta}40`,
           borderRadius: 8, padding: "12px 16px", margin: "12px 0",
         }}>
-          <span style={{ color: COLORS.magenta, fontFamily: "'Space Mono', monospace", fontSize: 14 }}>
+          <span style={{ color: COLORS.magenta, fontFamily: fonts.mono, fontSize: 14 }}>
             No unique solution! The lines are parallel (or the same line).
           </span>
         </div>
@@ -329,11 +314,11 @@ function Ch1() {
                 {/* Line labels */}
                 {label1Y && label1Y[1] > 20 && label1Y[1] < h - 10 && (
                   <text x={label1Y[0] - 40} y={label1Y[1] - 8} fill={COLORS.cyan} fontSize={11}
-                    fontFamily="'Space Mono', monospace" opacity={0.8}>L₁</text>
+                    fontFamily={fonts.mono} opacity={0.8}>L₁</text>
                 )}
                 {label2Y && label2Y[1] > 20 && label2Y[1] < h - 10 && (
                   <text x={label2Y[0] - 40} y={label2Y[1] - 8} fill={COLORS.magenta} fontSize={11}
-                    fontFamily="'Space Mono', monospace" opacity={0.8}>L₂</text>
+                    fontFamily={fonts.mono} opacity={0.8}>L₂</text>
                 )}
 
                 {/* Intersection point */}
@@ -350,7 +335,7 @@ function Ch1() {
                     <circle cx={intPt[0]} cy={intPt[1]} r={3.5} fill={COLORS.green} />
                     {/* Coordinate label */}
                     <text x={intPt[0] + 10} y={intPt[1] - 10} fill={COLORS.green} fontSize={11}
-                      fontFamily="'Space Mono', monospace" fontWeight={700}>
+                      fontFamily={fonts.mono} fontWeight={700}>
                       ({round(x)}, {round(y)})
                     </text>
                   </g>
@@ -359,7 +344,7 @@ function Ch1() {
                 {/* Parallel indicator */}
                 {det === 0 && (
                   <text x={w / 2} y={h / 2} fill={COLORS.magenta} fontSize={13} textAnchor="middle"
-                    fontFamily="'Space Mono', monospace" opacity={0.8}>
+                    fontFamily={fonts.mono} opacity={0.8}>
                     Parallel — no intersection!
                   </text>
                 )}
@@ -383,7 +368,7 @@ function Ch1() {
       <div style={{ marginTop: 22 }}>
         <div style={{
           fontSize: 10, color: COLORS.gold, textTransform: "uppercase", letterSpacing: 2.5,
-          fontFamily: "'Space Mono', monospace", fontWeight: 700, marginBottom: 10,
+          fontFamily: fonts.mono, fontWeight: 700, marginBottom: 10,
         }}>
           Shorthand: Ax = b
         </div>
@@ -444,7 +429,7 @@ function ManualAlgebraWalkthrough({ a, b, c, d, e, f, x, y, det }) {
           <span style={{ color: COLORS.gold, fontWeight: 700, marginRight: 8 }}>{open ? "▾" : "▸"}</span>
           Want to see the manual algebra? Here's how you'd solve this by hand.
         </span>
-        <span style={{ color: COLORS.muted, fontSize: 11, fontFamily: "'Space Mono', monospace" }}>
+        <span style={{ color: COLORS.muted, fontSize: 11, fontFamily: fonts.mono }}>
           {open ? "hide" : "show"}
         </span>
       </button>
@@ -544,13 +529,13 @@ function Step({ n, label, children }) {
         position: "absolute", left: 0, top: 0,
         width: 22, height: 22, borderRadius: "50%",
         background: `${COLORS.gold}25`, border: `1px solid ${COLORS.gold}60`,
-        color: COLORS.gold, fontSize: 11, fontFamily: "'Space Mono', monospace",
+        color: COLORS.gold, fontSize: 11, fontFamily: fonts.mono,
         display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 700,
       }}>{n}</div>
       <div style={{ fontSize: 11, color: COLORS.muted, textTransform: "uppercase", letterSpacing: 1, marginBottom: 4 }}>
         {label}
       </div>
-      <div style={{ fontFamily: "'Space Mono', monospace", fontSize: 13, color: COLORS.text }}>
+      <div style={{ fontFamily: fonts.mono, fontSize: 13, color: COLORS.text }}>
         {children}
       </div>
     </div>
@@ -563,7 +548,7 @@ function Eq({ children }) {
 
 const inputStyle = {
   width: 42, padding: "4px 6px", background: COLORS.surfaceLight, border: `1px solid ${COLORS.border}`,
-  borderRadius: 4, color: COLORS.gold, fontFamily: "'Space Mono', monospace", fontSize: 14, textAlign: "center",
+  borderRadius: 4, color: COLORS.gold, fontFamily: fonts.mono, fontSize: 14, textAlign: "center",
 };
 
 function MatBracket({ children, col = COLORS.gold }) {
@@ -691,7 +676,7 @@ function Ch2({ jumpTo }) {
               flex: 1, minWidth: 240,
               background: COLORS.surfaceLight, border: `1px solid ${COLORS.border}`,
               borderRadius: 8, padding: "14px 16px",
-              fontFamily: "'Space Mono', monospace", fontSize: 13, lineHeight: 2.2,
+              fontFamily: fonts.mono, fontSize: 13, lineHeight: 2.2,
             }}>
               <div style={{ color: COLORS.muted, fontSize: 11, marginBottom: 6, textTransform: "uppercase", letterSpacing: 1 }}>
                 Here's what happened — row by row:
@@ -745,19 +730,19 @@ function Ch2({ jumpTo }) {
                       <Arrow x1={o[0]} y1={o[1]} x2={out[0]} y2={out[1]} color={COLORS.gold} strokeWidth={2.5} />
                       {/* Labels */}
                       <text x={inp[0] + 8} y={inp[1] - 8} fill={COLORS.green} fontSize={12} fontWeight={700}
-                        fontFamily="'Space Mono', monospace">
+                        fontFamily={fonts.mono}>
                         input
                       </text>
                       <text x={inp[0] + 8} y={inp[1] + 14} fill={COLORS.green} fontSize={10} opacity={0.7}
-                        fontFamily="'Space Mono', monospace">
+                        fontFamily={fonts.mono}>
                         [{vx.toFixed(1)}, {vy.toFixed(1)}]
                       </text>
                       <text x={out[0] + 8} y={out[1] - 8} fill={COLORS.gold} fontSize={12} fontWeight={700}
-                        fontFamily="'Space Mono', monospace">
+                        fontFamily={fonts.mono}>
                         output
                       </text>
                       <text x={out[0] + 8} y={out[1] + 14} fill={COLORS.gold} fontSize={10} opacity={0.7}
-                        fontFamily="'Space Mono', monospace">
+                        fontFamily={fonts.mono}>
                         [{round(rx)}, {round(ry)}]
                       </text>
                     </g>
@@ -844,16 +829,16 @@ function Ch2({ jumpTo }) {
                       <Arrow x1={o[0]} y1={o[1]} x2={out[0]} y2={out[1]} color={COLORS.gold} strokeWidth={2.5} />
                       {/* Labels */}
                       <text x={inp[0] + 8} y={inp[1] - 8} fill={COLORS.green} fontSize={12} fontWeight={700}
-                        fontFamily="'Space Mono', monospace">in</text>
+                        fontFamily={fonts.mono}>in</text>
                       <text x={out[0] + 8} y={out[1] - 8} fill={COLORS.gold} fontSize={12} fontWeight={700}
-                        fontFamily="'Space Mono', monospace">out</text>
+                        fontFamily={fonts.mono}>out</text>
                       {/* Component labels */}
                       <text x={(o[0] + comp1[0]) / 2 + 6} y={(o[1] + comp1[1]) / 2 - 6}
-                        fill={COLORS.cyan} fontSize={10} fontFamily="'Space Mono', monospace" opacity={0.8}>
+                        fill={COLORS.cyan} fontSize={10} fontFamily={fonts.mono} opacity={0.8}>
                         col₁×{vx.toFixed(1)}
                       </text>
                       <text x={(comp1[0] + comp2end[0]) / 2 + 6} y={(comp1[1] + comp2end[1]) / 2 - 6}
-                        fill={COLORS.magenta} fontSize={10} fontFamily="'Space Mono', monospace" opacity={0.8}>
+                        fill={COLORS.magenta} fontSize={10} fontFamily={fonts.mono} opacity={0.8}>
                         col₂×{vy.toFixed(1)}
                       </text>
                     </g>
@@ -946,7 +931,7 @@ function Ch2({ jumpTo }) {
               <div style={{
                 marginTop: 14, padding: "10px 12px", background: COLORS.surfaceLight,
                 border: `1px solid ${COLORS.border}`, borderRadius: 8,
-                fontFamily: "'Space Mono', monospace", fontSize: 12, lineHeight: 1.8,
+                fontFamily: fonts.mono, fontSize: 12, lineHeight: 1.8,
               }}>
                 <div style={{ color: COLORS.muted, fontSize: 10, textTransform: "uppercase", letterSpacing: 1, marginBottom: 4 }}>
                   Where the basis vectors land:
@@ -1022,9 +1007,9 @@ function Ch2({ jumpTo }) {
                       <Arrow x1={o[0]} y1={o[1]} x2={e1[0]} y2={e1[1]} color={COLORS.cyan} strokeWidth={3} />
                       <Arrow x1={o[0]} y1={o[1]} x2={e2[0]} y2={e2[1]} color={COLORS.magenta} strokeWidth={3} />
                       <text x={e1[0] + 6} y={e1[1] - 8} fill={COLORS.cyan} fontSize={12} fontWeight={700}
-                        fontFamily="'Space Mono', monospace">x̂ʼ</text>
+                        fontFamily={fonts.mono}>x̂ʼ</text>
                       <text x={e2[0] + 6} y={e2[1] - 8} fill={COLORS.magenta} fontSize={12} fontWeight={700}
-                        fontFamily="'Space Mono', monospace">ŷʼ</text>
+                        fontFamily={fonts.mono}>ŷʼ</text>
                     </g>
                   );
                 }}
@@ -1233,7 +1218,7 @@ function Ch3() {
               <div style={{
                 marginTop: 14, padding: "10px 12px",
                 background: COLORS.surfaceLight, border: `1px solid ${COLORS.border}`,
-                borderRadius: 8, fontFamily: "'Space Mono', monospace", fontSize: 12, lineHeight: 1.9,
+                borderRadius: 8, fontFamily: fonts.mono, fontSize: 12, lineHeight: 1.9,
               }}>
                 <div style={{ color: COLORS.muted, fontSize: 10, textTransform: "uppercase", letterSpacing: 1, marginBottom: 4 }}>
                   Live breakdown
@@ -1277,7 +1262,7 @@ function Ch3() {
                       <text x={a[0] + 6} y={a[1] - 6} fill={COLORS.cyan} fontSize={12} fontWeight={700}>a</text>
                       <text x={b[0] + 6} y={b[1] - 6} fill={COLORS.magenta} fontSize={12} fontWeight={700}>b</text>
                       <text x={p[0] + 8} y={p[1] + 14} fill={COLORS.orange} fontSize={10}
-                        fontFamily="'Space Mono', monospace">
+                        fontFamily={fonts.mono}>
                         shadow len = {projLen.toFixed(2)}
                       </text>
                     </g>
@@ -1421,7 +1406,7 @@ function Viewer3D({ yaw, pitch, onDragStart, onDragMove, onDragEnd, cosA, sinA, 
             return (
               <text x={lp[0] + 8} y={lp[1] - 4}
                 fill={s.labelColor} fontSize={12} fontWeight={700}
-                fontFamily="'Space Mono', monospace">
+                fontFamily={fonts.mono}>
                 {s.label}
               </text>
             );
@@ -1549,7 +1534,7 @@ function Ch4() {
       }}>
         <div style={{
           fontSize: 10, color: COLORS.orange, textTransform: "uppercase", letterSpacing: 2,
-          fontFamily: "'Space Mono', monospace", fontWeight: 700, marginBottom: 6,
+          fontFamily: fonts.mono, fontWeight: 700, marginBottom: 6,
         }}>
           Note on units: radians first
         </div>
@@ -1565,7 +1550,7 @@ function Ch4() {
         display: "inline-block",
         margin: "-4px 0 12px 0",
         padding: "6px 10px",
-        fontSize: 11, fontFamily: "'Space Mono', monospace",
+        fontSize: 11, fontFamily: fonts.mono,
         background: "transparent", border: `1px dashed ${COLORS.muted}`,
         borderRadius: 6, color: COLORS.muted, cursor: "pointer",
         fontStyle: "italic",
@@ -1641,7 +1626,7 @@ function Ch4() {
           </Prose>
 
           <Slider label="θ" value={angle} onChange={setAngle} min={0} max={360} step={1} color={COLORS.orange} />
-          <div style={{ fontSize: 11, color: COLORS.muted, fontFamily: "'Space Mono', monospace", marginTop: -6, marginBottom: 12 }}>
+          <div style={{ fontSize: 11, color: COLORS.muted, fontFamily: fonts.mono, marginTop: -6, marginBottom: 12 }}>
             θ = <span style={{ color: COLORS.orange, fontWeight: 700 }}>{rad.toFixed(3)} rad</span>
             &nbsp; <span style={{ opacity: 0.55 }}>({angle}°)</span>
           </div>
@@ -1665,13 +1650,13 @@ function Ch4() {
                       {/* Old basis (dim) */}
                       <Arrow x1={o[0]} y1={o[1]} x2={oldX[0]} y2={oldX[1]} color={COLORS.cyan} strokeWidth={1.5} dashed />
                       <Arrow x1={o[0]} y1={o[1]} x2={oldY[0]} y2={oldY[1]} color={COLORS.magenta} strokeWidth={1.5} dashed />
-                      <text x={oldX[0] + 4} y={oldX[1] - 6} fill={COLORS.cyan} fontSize={11} opacity={0.6} fontFamily="'Space Mono', monospace">x̂</text>
-                      <text x={oldY[0] + 4} y={oldY[1] - 6} fill={COLORS.magenta} fontSize={11} opacity={0.6} fontFamily="'Space Mono', monospace">ŷ</text>
+                      <text x={oldX[0] + 4} y={oldX[1] - 6} fill={COLORS.cyan} fontSize={11} opacity={0.6} fontFamily={fonts.mono}>x̂</text>
+                      <text x={oldY[0] + 4} y={oldY[1] - 6} fill={COLORS.magenta} fontSize={11} opacity={0.6} fontFamily={fonts.mono}>ŷ</text>
                       {/* New basis (bright) */}
                       <Arrow x1={o[0]} y1={o[1]} x2={newX[0]} y2={newX[1]} color={COLORS.cyan} strokeWidth={3} />
                       <Arrow x1={o[0]} y1={o[1]} x2={newY[0]} y2={newY[1]} color={COLORS.magenta} strokeWidth={3} />
-                      <text x={newX[0] + 6} y={newX[1] - 8} fill={COLORS.cyan} fontSize={13} fontWeight={700} fontFamily="'Space Mono', monospace">x̂′</text>
-                      <text x={newY[0] + 6} y={newY[1] - 8} fill={COLORS.magenta} fontSize={13} fontWeight={700} fontFamily="'Space Mono', monospace">ŷ′</text>
+                      <text x={newX[0] + 6} y={newX[1] - 8} fill={COLORS.cyan} fontSize={13} fontWeight={700} fontFamily={fonts.mono}>x̂′</text>
+                      <text x={newY[0] + 6} y={newY[1] - 8} fill={COLORS.magenta} fontSize={13} fontWeight={700} fontFamily={fonts.mono}>ŷ′</text>
                       {/* Shadow projections for x̂' */}
                       <line x1={newX[0]} y1={newX[1]} x2={newX[0]} y2={o[1]}
                         stroke={COLORS.cyan} strokeWidth={1} strokeDasharray="2 3" opacity={0.5} />
@@ -1695,7 +1680,7 @@ function Ch4() {
               <div style={{
                 padding: "14px 16px",
                 background: COLORS.surfaceLight, border: `1px solid ${COLORS.border}`,
-                borderRadius: 8, fontFamily: "'Space Mono', monospace", fontSize: 13, lineHeight: 2.2,
+                borderRadius: 8, fontFamily: fonts.mono, fontSize: 13, lineHeight: 2.2,
               }}>
                 <div>
                   <span style={{ color: COLORS.cyan, fontWeight: 700 }}>x̂′</span> = (cos θ, sin θ)
@@ -1765,7 +1750,7 @@ function Ch4() {
 
           <div style={{ fontSize: 12, color: COLORS.muted, marginBottom: 6 }}>Rotation angle θ about the z-axis:</div>
           <Slider label="θ" value={angle} onChange={setAngle} min={0} max={360} step={1} color={COLORS.orange} />
-          <div style={{ fontSize: 11, color: COLORS.muted, fontFamily: "'Space Mono', monospace", marginTop: -6, marginBottom: 12 }}>
+          <div style={{ fontSize: 11, color: COLORS.muted, fontFamily: fonts.mono, marginTop: -6, marginBottom: 12 }}>
             θ = <span style={{ color: COLORS.orange, fontWeight: 700 }}>{rad.toFixed(3)} rad</span>
             &nbsp; <span style={{ opacity: 0.55 }}>({angle}°)</span>
           </div>
@@ -1789,7 +1774,7 @@ function Ch4() {
               <div style={{
                 padding: "12px 14px",
                 background: COLORS.surfaceLight, border: `1px solid ${COLORS.border}`,
-                borderRadius: 8, fontFamily: "'Space Mono', monospace", fontSize: 13, lineHeight: 2,
+                borderRadius: 8, fontFamily: fonts.mono, fontSize: 13, lineHeight: 2,
               }}>
                 <div><span style={{ color: COLORS.cyan, fontWeight: 700 }}>x̂′</span> = (cos θ, sin θ, 0) = ({cosA.toFixed(2)}, {sinA.toFixed(2)}, 0)</div>
                 <div><span style={{ color: COLORS.magenta, fontWeight: 700 }}>ŷ′</span> = (−sin θ, cos θ, 0) = ({(-sinA).toFixed(2)}, {cosA.toFixed(2)}, 0)</div>
@@ -1844,12 +1829,12 @@ function Ch4() {
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 8, marginBottom: 8 }}>
           <div style={{
             fontSize: 10, color: COLORS.muted, textTransform: "uppercase", letterSpacing: 2.5,
-            fontFamily: "'Space Mono', monospace", fontWeight: 700,
+            fontFamily: fonts.mono, fontWeight: 700,
           }}>
             Aside &nbsp;·&nbsp; Sin &amp; Cos at a glance
           </div>
           <button onClick={jumpToTop} style={{
-            padding: "4px 10px", fontSize: 10, fontFamily: "'Space Mono', monospace",
+            padding: "4px 10px", fontSize: 10, fontFamily: fonts.mono,
             background: "transparent", border: `1px solid ${COLORS.muted}`,
             borderRadius: 6, color: COLORS.muted, cursor: "pointer",
           }}>
@@ -1865,7 +1850,7 @@ function Ch4() {
         </Prose>
 
         <div style={{
-          fontSize: 11, color: COLORS.muted, fontFamily: "'Space Mono', monospace",
+          fontSize: 11, color: COLORS.muted, fontFamily: fonts.mono,
           marginBottom: 6, marginTop: 8,
         }}>
           θ = <span style={{ color: COLORS.orange, fontWeight: 700 }}>{(asideAngle * Math.PI / 180).toFixed(3)} rad</span>
@@ -1900,11 +1885,11 @@ function Ch4() {
                     {/* sin (vertical) leg — "y-shadow" */}
                     <line x1={px} y1={py} x2={px} y2={cy} stroke={COLORS.magenta} strokeWidth={2} />
                     <text x={px + 6} y={(py + cy) / 2 + 3} fill={COLORS.magenta} fontSize={10}
-                      fontFamily="'Space Mono', monospace">sin = {asideSin.toFixed(2)}</text>
+                      fontFamily={fonts.mono}>sin = {asideSin.toFixed(2)}</text>
                     {/* cos (horizontal) leg — "x-shadow" */}
                     <line x1={cx} y1={cy} x2={px} y2={cy} stroke={COLORS.cyan} strokeWidth={2} />
                     <text x={(cx + px) / 2 - 14} y={cy + 14} fill={COLORS.cyan} fontSize={10}
-                      fontFamily="'Space Mono', monospace">cos = {asideCos.toFixed(2)}</text>
+                      fontFamily={fonts.mono}>cos = {asideCos.toFixed(2)}</text>
                     {/* Radius */}
                     <line x1={cx} y1={cy} x2={px} y2={py} stroke={COLORS.orange} strokeWidth={1.5} opacity={0.6} />
                     {/* Point */}
@@ -1935,7 +1920,7 @@ function Ch4() {
               return (
                 <div key={pi} style={{ marginBottom: pi === 0 ? 8 : 0 }}>
                   <div style={{
-                    fontSize: 10, color: plot.color, fontFamily: "'Space Mono', monospace",
+                    fontSize: 10, color: plot.color, fontFamily: fonts.mono,
                     marginBottom: 2,
                   }}>
                     {plot.name}
@@ -1966,14 +1951,14 @@ function Ch4() {
                     <circle cx={markerX} cy={markerY} r={4} fill={COLORS.orange} />
                     {/* Value label */}
                     <text x={markerX + 6} y={markerY - 6} fill={plot.color}
-                      fontSize={10} fontFamily="'Space Mono', monospace">
+                      fontSize={10} fontFamily={fonts.mono}>
                       {plot.val.toFixed(2)}
                     </text>
                     {/* Axis labels */}
                     {[0, 90, 180, 270, 360].map(d => {
                       const x = pad + (d / 360) * (W - 2 * pad);
                       return <text key={d} x={x} y={H - 2} fill={COLORS.muted}
-                        fontSize={8} textAnchor="middle" fontFamily="'Space Mono', monospace">{d}°</text>;
+                        fontSize={8} textAnchor="middle" fontFamily={fonts.mono}>{d}°</text>;
                     })}
                   </svg>
                 </div>
@@ -1988,7 +1973,7 @@ function Ch4() {
             The simple relations
           </div>
           <div style={{ overflowX: "auto" }}>
-            <table style={{ borderCollapse: "collapse", fontFamily: "'Space Mono', monospace", fontSize: 12, width: "100%", minWidth: 520 }}>
+            <table style={{ borderCollapse: "collapse", fontFamily: fonts.mono, fontSize: 12, width: "100%", minWidth: 520 }}>
               <thead>
                 <tr style={{ color: COLORS.muted, fontSize: 10, textTransform: "uppercase", letterSpacing: 1 }}>
                   <th style={{ padding: "6px 8px", textAlign: "left", fontWeight: 400 }}>
@@ -2052,7 +2037,7 @@ function Ch4() {
 
         <div style={{ textAlign: "center", marginTop: 14 }}>
           <button onClick={jumpToTop} style={{
-            padding: "6px 14px", fontSize: 11, fontFamily: "'Space Mono', monospace",
+            padding: "6px 14px", fontSize: 11, fontFamily: fonts.mono,
             background: COLORS.surfaceLight, border: `1px solid ${COLORS.border}`,
             borderRadius: 6, color: COLORS.muted, cursor: "pointer",
           }}>
@@ -2106,7 +2091,7 @@ function Ch5() {
                   <Arrow x1={o[0]} y1={o[1]} x2={a[0]} y2={a[1]} color={COLORS.cyan} strokeWidth={2.5} />
                   <Arrow x1={o[0]} y1={o[1]} x2={b[0]} y2={b[1]} color={COLORS.magenta} strokeWidth={2.5} />
                   <text x={(o[0] + a[0] + ab[0] + b[0]) / 4 - 15} y={(o[1] + a[1] + ab[1] + b[1]) / 4 + 5}
-                    fill={fillColor} fontSize={16} fontWeight={700} fontFamily="'Space Mono', monospace">
+                    fill={fillColor} fontSize={16} fontWeight={700} fontFamily={fonts.mono}>
                     {round(Math.abs(det))}
                   </text>
                 </g>
@@ -2292,7 +2277,7 @@ function Ch7() {
             Transition Matrix (rows sum to 1)
           </div>
           <div style={{ overflowX: "auto" }}>
-            <table style={{ borderCollapse: "collapse", fontFamily: "'Space Mono', monospace", fontSize: 11 }}>
+            <table style={{ borderCollapse: "collapse", fontFamily: fonts.mono, fontSize: 11 }}>
               <thead>
                 <tr>
                   <td style={{ padding: "4px 6px", fontSize: 9, color: COLORS.muted }}>from \ to</td>
@@ -2322,7 +2307,7 @@ function Ch7() {
                             width: 44, padding: "2px 3px",
                             background: COLORS.surfaceLight, border: `1px solid ${COLORS.border}`,
                             borderRadius: 3, color: val > 0.35 ? COLORS.gold : COLORS.text,
-                            fontFamily: "'Space Mono', monospace", fontSize: 10, textAlign: "center",
+                            fontFamily: fonts.mono, fontSize: 10, textAlign: "center",
                           }}
                         />
                       </td>
@@ -2358,7 +2343,7 @@ function Ch7() {
                     borderRadius: 3, transition: "width 0.25s",
                   }} />
                 </div>
-                <span style={{ fontSize: 10, color: COLORS.text, fontFamily: "'Space Mono', monospace", minWidth: 42, textAlign: "right" }}>
+                <span style={{ fontSize: 10, color: COLORS.text, fontFamily: fonts.mono, minWidth: 42, textAlign: "right" }}>
                   {(p * 100).toFixed(1)}%
                 </span>
               </div>
@@ -2376,7 +2361,7 @@ function Ch7() {
               </div>
               <div style={{ display: "flex", flexWrap: "wrap", gap: "3px 10px" }}>
                 {ss.map((p, i) => (
-                  <span key={i} style={{ fontSize: 10, color: stateColors[i], fontFamily: "'Space Mono', monospace" }}>
+                  <span key={i} style={{ fontSize: 10, color: stateColors[i], fontFamily: fonts.mono }}>
                     {labels[i]} {(p * 100).toFixed(1)}%
                   </span>
                 ))}
@@ -2411,7 +2396,7 @@ function Ch7() {
                     opacity={0.45} />
                   {p > 0.15 && (
                     <text x={(sx + ex) / 2} y={(sy + ey) / 2 - 2} fill={COLORS.text} fontSize={9} textAnchor="middle"
-                      fontFamily="'Space Mono', monospace" opacity={0.85}>
+                      fontFamily={fonts.mono} opacity={0.85}>
                       {p.toFixed(2)}
                     </text>
                   )}
@@ -2433,7 +2418,7 @@ function Ch7() {
                   <circle cx={lx} cy={ly} r={16} fill="none" stroke={stateColors[i]}
                     strokeWidth={Math.max(1, p * 2.5)} opacity={0.55} />
                   <text x={lx} y={ly + 3} fill={COLORS.text} fontSize={9} textAnchor="middle"
-                    fontFamily="'Space Mono', monospace" opacity={0.85}>
+                    fontFamily={fonts.mono} opacity={0.85}>
                     {p.toFixed(2)}
                   </text>
                 </g>
@@ -2450,7 +2435,7 @@ function Ch7() {
                     {labels[i]}
                   </text>
                   <text x={cx} y={cy + 12} fill={stateColors[i]} fontSize={10} textAnchor="middle"
-                    fontFamily="'Space Mono', monospace">
+                    fontFamily={fonts.mono}>
                     {(dist[i] * 100).toFixed(0)}%
                   </text>
                 </g>
@@ -2489,7 +2474,7 @@ function Ch7() {
 const btnStyle = {
   padding: "6px 14px", fontSize: 12, background: COLORS.surfaceLight,
   border: `1px solid ${COLORS.border}`, borderRadius: 6, color: COLORS.text, cursor: "pointer",
-  fontFamily: "'Space Mono', monospace",
+  fontFamily: fonts.mono,
 };
 
 // ==================== CHAPTER 8: NEURAL NETWORKS ====================
@@ -2712,7 +2697,7 @@ function Ch8() {
                 background: hiddenSize === k ? COLORS.green + "30" : COLORS.bg,
                 border: `1px solid ${hiddenSize === k ? COLORS.green : COLORS.border}`,
                 borderRadius: 5, color: hiddenSize === k ? COLORS.green : COLORS.text,
-                cursor: "pointer", fontFamily: "'Space Mono', monospace", fontWeight: 700,
+                cursor: "pointer", fontFamily: fonts.mono, fontWeight: 700,
               }}>
               {k}
             </button>
@@ -2729,7 +2714,7 @@ function Ch8() {
           {running ? "Pause training" : "▶ Train"}
         </button>
         <button onClick={reset} style={btnStyle}>Reset</button>
-        <div style={{ marginLeft: "auto", fontSize: 11, color: COLORS.muted, fontFamily: "'Space Mono', monospace" }}>
+        <div style={{ marginLeft: "auto", fontSize: 11, color: COLORS.muted, fontFamily: fonts.mono }}>
           step {epoch} &nbsp;·&nbsp; loss {currLoss.toFixed(3)} &nbsp;·&nbsp; acc <span style={{ color: accuracy > 0.95 ? COLORS.green : accuracy > 0.8 ? COLORS.gold : COLORS.magenta }}>{(accuracy * 100).toFixed(0)}%</span>
         </div>
       </div>
@@ -2873,7 +2858,7 @@ function HiddenSpace2D({ net, data }) {
       <line x1={CX} y1={0} x2={CX} y2={H} stroke={COLORS.gridAxis} strokeWidth={0.6} />
       {pts}
       <text x={W - 5} y={H - 5} fill={COLORS.muted} fontSize={9} textAnchor="end"
-        fontFamily="'Space Mono', monospace">tanh range [-1, 1]²</text>
+        fontFamily={fonts.mono}>tanh range [-1, 1]²</text>
     </svg>
   );
 }
@@ -2995,7 +2980,7 @@ function HiddenSpace3D({ net, data, yaw, pitch, onDragStart, onDragMove, onDragE
                 stroke={item.c} strokeWidth={1.5} opacity={0.7} />
               <text x={item.label_pos[0] + 6} y={item.label_pos[1] - 4}
                 fill={item.c} fontSize={11} fontWeight={700}
-                fontFamily="'Space Mono', monospace">{item.label}</text>
+                fontFamily={fonts.mono}>{item.label}</text>
             </g>
           );
         } else if (kind === "plane") {
@@ -3046,10 +3031,10 @@ function LossCurve({ history }) {
       <line x1={pad} y1={pad} x2={pad} y2={H - pad} stroke={COLORS.border} strokeWidth={0.6} />
       <polyline points={points.map(p => p.join(",")).join(" ")}
         fill="none" stroke={COLORS.green} strokeWidth={1.8} />
-      <text x={W - 4} y={H - 6} fill={COLORS.muted} fontSize={9} textAnchor="end" fontFamily="'Space Mono', monospace">
+      <text x={W - 4} y={H - 6} fill={COLORS.muted} fontSize={9} textAnchor="end" fontFamily={fonts.mono}>
         steps
       </text>
-      <text x={4} y={pad - 4} fill={COLORS.muted} fontSize={9} fontFamily="'Space Mono', monospace">loss</text>
+      <text x={4} y={pad - 4} fill={COLORS.muted} fontSize={9} fontFamily={fonts.mono}>loss</text>
     </svg>
   );
 }
@@ -3083,7 +3068,7 @@ function WeightMatrices({ net }) {
               borderRadius: 3,
               display: "flex", alignItems: "center", justifyContent: "center",
               fontSize: 9, color: Math.abs(v) > max * 0.5 ? "#fff" : COLORS.muted,
-              fontFamily: "'Space Mono', monospace",
+              fontFamily: fonts.mono,
             }}>
               {v >= 0 ? v.toFixed(1) : v.toFixed(1)}
             </div>
@@ -3099,15 +3084,15 @@ function WeightMatrices({ net }) {
       display: "flex", gap: 18, flexWrap: "wrap", fontSize: 11,
     }}>
       <div>
-        <div style={{ color: COLORS.muted, fontFamily: "'Space Mono', monospace", marginBottom: 4 }}>W₁ ({net.H}×2)</div>
+        <div style={{ color: COLORS.muted, fontFamily: fonts.mono, marginBottom: 4 }}>W₁ ({net.H}×2)</div>
         {renderMatrix(W1, max1)}
-        <div style={{ color: COLORS.muted, fontFamily: "'Space Mono', monospace", marginTop: 8, marginBottom: 4 }}>b₁ ({net.H}×1)</div>
+        <div style={{ color: COLORS.muted, fontFamily: fonts.mono, marginTop: 8, marginBottom: 4 }}>b₁ ({net.H}×1)</div>
         {renderMatrix(b1.map(v => [v]), max1)}
       </div>
       <div>
-        <div style={{ color: COLORS.muted, fontFamily: "'Space Mono', monospace", marginBottom: 4 }}>W₂ (1×{net.H})</div>
+        <div style={{ color: COLORS.muted, fontFamily: fonts.mono, marginBottom: 4 }}>W₂ (1×{net.H})</div>
         {renderMatrix(W2, max2)}
-        <div style={{ color: COLORS.muted, fontFamily: "'Space Mono', monospace", marginTop: 8, marginBottom: 4 }}>b₂ (1×1)</div>
+        <div style={{ color: COLORS.muted, fontFamily: fonts.mono, marginTop: 8, marginBottom: 4 }}>b₂ (1×1)</div>
         {renderMatrix([[b2[0]]], max2)}
       </div>
     </div>
@@ -3198,7 +3183,7 @@ function Ch9() {
           }}>
             <div style={{
               fontSize: 11, color: s.color, textTransform: "uppercase", letterSpacing: 2,
-              fontFamily: "'Space Mono', monospace", fontWeight: 700, marginBottom: 8,
+              fontFamily: fonts.mono, fontWeight: 700, marginBottom: 8,
             }}>
               {`0${i + 1}`.slice(-2)} &nbsp;·&nbsp; {s.title}
             </div>
@@ -3307,7 +3292,7 @@ export default function MatrixExplorer() {
       <main style={{ maxWidth: 800, margin: "0 auto", padding: "24px 20px 48px" }}>
         <div style={{ marginBottom: 16 }}>
           <span style={{
-            fontSize: 11, color: ch.color, fontFamily: "'Space Mono', monospace",
+            fontSize: 11, color: ch.color, fontFamily: fonts.mono,
             textTransform: "uppercase", letterSpacing: 2,
           }}>
             Chapter {ch.num}

@@ -1,22 +1,4 @@
-// =============================================================================
-// Shared presentational blocks used by both the main React app and the
-// Markdown renderer. Keeping these in one place means editing styles once.
-// =============================================================================
-
-const COLORS = {
-  bg: "#0c0c18",
-  surface: "#141428",
-  surfaceLight: "#1e1e3a",
-  border: "#2a2a50",
-  text: "#e4e4f0",
-  muted: "#7878a0",
-  cyan: "#00d4ff",
-  magenta: "#ff4d8d",
-  gold: "#ffc44d",
-  green: "#4ddb7a",
-  orange: "#ff8844",
-  purple: "#aa66ff",
-};
+import { colors as COLORS, fonts } from "./theme.js";
 
 export function Prose({ children }) {
   return <div style={{ fontSize: 14, lineHeight: 1.75, color: COLORS.text, margin: "12px 0" }}>{children}</div>;
@@ -46,7 +28,7 @@ export function Definition({ formal, playful }) {
         fontSize: 13, fontStyle: "italic", color: COLORS.text, lineHeight: 1.65,
       }}>
         <span style={{
-          color: COLORS.purple, fontFamily: "'Space Mono', monospace",
+          color: COLORS.purple, fontFamily: fonts.mono,
           fontSize: 10, textTransform: "uppercase", letterSpacing: 2,
           fontStyle: "normal", marginRight: 10, fontWeight: 700,
         }}>Definition</span>
@@ -57,7 +39,7 @@ export function Definition({ formal, playful }) {
         fontSize: 13, color: COLORS.text, lineHeight: 1.65,
       }}>
         <span style={{
-          color: COLORS.gold, fontFamily: "'Space Mono', monospace",
+          color: COLORS.gold, fontFamily: fonts.mono,
           fontSize: 10, textTransform: "uppercase", letterSpacing: 2,
           marginRight: 10, fontWeight: 700,
         }}>In plain English</span>
@@ -78,14 +60,14 @@ export function TakeHome({ major, minor, color = COLORS.gold }) {
     }}>
       <div style={{
         fontSize: 10, color, textTransform: "uppercase", letterSpacing: 2.5,
-        fontFamily: "'Space Mono', monospace", fontWeight: 700, marginBottom: 12,
+        fontFamily: fonts.mono, fontWeight: 700, marginBottom: 12,
       }}>✦ Take-Home</div>
 
       {major && major.length > 0 && (
         <div style={{ marginBottom: minor && minor.length > 0 ? 14 : 0 }}>
           <div style={{
             fontSize: 11, color, textTransform: "uppercase", letterSpacing: 1.8,
-            fontWeight: 700, marginBottom: 8, fontFamily: "'Space Mono', monospace",
+            fontWeight: 700, marginBottom: 8, fontFamily: fonts.mono,
           }}>Major</div>
           <ul style={{ paddingLeft: 16, margin: 0, listStyle: "none" }}>
             {major.map((item, i) => (
@@ -105,7 +87,7 @@ export function TakeHome({ major, minor, color = COLORS.gold }) {
         <div>
           <div style={{
             fontSize: 11, color: COLORS.muted, textTransform: "uppercase", letterSpacing: 1.8,
-            fontWeight: 700, marginBottom: 8, fontFamily: "'Space Mono', monospace",
+            fontWeight: 700, marginBottom: 8, fontFamily: fonts.mono,
           }}>Minor</div>
           <ul style={{ paddingLeft: 16, margin: 0, listStyle: "none" }}>
             {minor.map((item, i) => (

@@ -1,4 +1,5 @@
 import { Definition, Callout, TakeHome, Prose } from "./shared-blocks.jsx";
+import { colors, fonts, accentMap } from "./theme.js";
 
 // =============================================================================
 // Lightweight Markdown renderer for chapter intro/outro text.
@@ -69,9 +70,9 @@ function renderInline(text, keyPrefix = "i") {
         flushBuf();
         nodes.push(
           <code key={`${keyPrefix}-${k++}`} style={{
-            fontFamily: "'Space Mono', monospace", fontSize: "0.92em",
+            fontFamily: fonts.mono, fontSize: "0.92em",
             padding: "1px 5px", borderRadius: 3,
-            background: "rgba(255, 196, 77, 0.12)", color: "#ffc44d",
+            background: `${colors.gold}1f`, color: colors.gold,
           }}>{text.slice(i + 1, end)}</code>
         );
         i = end + 1;
@@ -85,7 +86,7 @@ function renderInline(text, keyPrefix = "i") {
         flushBuf();
         nodes.push(
           <span key={`${keyPrefix}-${k++}`} style={{
-            fontFamily: "'Space Mono', monospace", color: "#ffc44d",
+            fontFamily: fonts.mono, color: colors.gold,
           }}>{text.slice(i + 2, end)}</span>
         );
         i = end + 2;
@@ -105,7 +106,7 @@ function renderInline(text, keyPrefix = "i") {
             <a key={`${keyPrefix}-${k++}`} href={url}
               target={url.startsWith("http") ? "_blank" : undefined}
               rel={url.startsWith("http") ? "noopener noreferrer" : undefined}
-              style={{ color: "#00d4ff", textDecoration: "underline" }}>
+              style={{ color: colors.cyan, textDecoration: "underline" }}>
               {renderInline(linkText, `${keyPrefix}l${k}`)}
             </a>
           );
@@ -181,13 +182,8 @@ function parseBlocks(src, keyPrefix = "b") {
           inner.push(lines[i]); i++;
         }
         i++;
-        const colorMap = {
-          cyan: "#00d4ff", magenta: "#ff4d8d", gold: "#ffc44d",
-          green: "#4ddb7a", orange: "#ff8844", purple: "#aa66ff",
-          muted: "#7878a0",
-        };
         nodes.push(
-          <Callout key={`${keyPrefix}-${k++}`} color={colorMap[attrs.color] || colorMap.cyan}>
+          <Callout key={`${keyPrefix}-${k++}`} color={accentMap[attrs.color] || accentMap.cyan}>
             {parseBlocks(inner.join("\n"), `${keyPrefix}co${k}`)}
           </Callout>
         );
@@ -208,13 +204,9 @@ function parseBlocks(src, keyPrefix = "b") {
           i++;
         }
         i++;
-        const colorMap = {
-          cyan: "#00d4ff", magenta: "#ff4d8d", gold: "#ffc44d",
-          green: "#4ddb7a", orange: "#ff8844", purple: "#aa66ff",
-        };
         nodes.push(
           <TakeHome key={`${keyPrefix}-${k++}`}
-            color={colorMap[attrs.color] || colorMap.gold}
+            color={accentMap[attrs.color] || accentMap.gold}
             major={major.map((m, idx) => <span key={idx}>{renderInline(m, `mj${idx}`)}</span>)}
             minor={minor.map((m, idx) => <span key={idx}>{renderInline(m, `mn${idx}`)}</span>)}
           />
@@ -238,7 +230,7 @@ function parseBlocks(src, keyPrefix = "b") {
       const Tag = ordered ? "ol" : "ul";
       nodes.push(
         <Tag key={`${keyPrefix}-${k++}`} style={{
-          paddingLeft: 22, margin: "10px 0", color: "#e4e4f0",
+          paddingLeft: 22, margin: "10px 0", color: colors.text,
           fontSize: 14, lineHeight: 1.7,
         }}>
           {items.map((item, idx) => (
@@ -249,14 +241,34 @@ function parseBlocks(src, keyPrefix = "b") {
       continue;
     }
 
-    // Paragraph: collect consecutive non-blank, non-list, non-directive lines
+    // Heading: # through ######
+    const headingMatch = line.match(/^(#{1,6})\s+(.+)$/);
+    if (headingMatch) {
+      const level = headingMatch[1].length;
+      const sizes = { 1: 24, 2: 20, 3: 17, 4: 15, 5: 14, 6: 13 };
+      const Tag = `h${level}`;
+      nodes.push(
+        <Tag key={`${keyPrefix}-${k++}`} style={{
+          fontSize: sizes[level], fontWeight: 600, color: colors.text,
+          margin: `${level <= 2 ? 20 : 14}px 0 ${level <= 2 ? 10 : 6}px`,
+          lineHeight: 1.3,
+        }}>
+          {renderInline(headingMatch[2], `${keyPrefix}h${k}`)}
+        </Tag>
+      );
+      i++;
+      continue;
+    }
+
+    // Paragraph: collect consecutive non-blank, non-list, non-directive, non-heading lines
     const para = [];
     while (
       i < lines.length &&
       lines[i].trim() &&
       !lines[i].trimStart().startsWith(":::") &&
       !/^\s*[-*]\s+/.test(lines[i]) &&
-      !/^\s*\d+\.\s+/.test(lines[i])
+      !/^\s*\d+\.\s+/.test(lines[i]) &&
+      !/^#{1,6}\s+/.test(lines[i])
     ) {
       para.push(lines[i]);
       i++;
