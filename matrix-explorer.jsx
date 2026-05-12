@@ -18,7 +18,7 @@ import ch9Md from "./content/ch9-summary.md?raw";
 // Returns { intro: string, outro: string }, either of which may be empty.
 function splitMd(src) {
   const sections = { intro: "", middle: "", outro: "" };
-  const re = /^#\s+(intro|middle|outro)\s*$/gim;
+  const re = /^#\s+(\w+)\s*$/gim;
   const matches = [...src.matchAll(re)];
   if (matches.length === 0) {
     sections.intro = src.trim();
@@ -785,7 +785,7 @@ function InverseWalkthrough({ a, b, c, d, e, f, x, y, det }) {
 }
 
 // ==================== CHAPTER 2 ====================
-function Ch2({ jumpTo }) {
+function Ch2() {
   const [step, setStep] = useState(1);
   const [mat, setMat] = useState([2, -1, 1, 1.5]);
   const setM = (i, v) => { const m = [...mat]; m[i] = v; setMat(m); };
@@ -831,24 +831,7 @@ function Ch2({ jumpTo }) {
       {/* ===================== STEP 1: How multiplication works ===================== */}
       {step === 1 && (
         <div>
-          <Prose>
-            Before a matrix can do anything cool, you need to know the one rule: <b>how to multiply a matrix by a vector</b>.
-            There's no "natural" reason this is how it works — mathematicians <b>defined</b> it this way because it turns out to be
-            extraordinarily useful. Here's the definition:
-          </Prose>
-
-          <Definition
-            formal={<>
-              For a 2×2 matrix <b>M</b> with rows (a, b) and (c, d), and a column vector <b>v</b> = (x, y),
-              the matrix-vector product <b>Mv</b> is defined as the column vector whose first entry is
-              ax + by and whose second entry is cx + dy.
-            </>}
-            playful={<>
-              Each row of the matrix "reaches across" and grabs the vector, multiplying matching parts
-              and adding them up. Row 1 of the matrix pairs up with the vector to produce the first output number.
-              Row 2 does the same to produce the second.
-            </>}
-          />
+          <Markdown src={CONTENT[2].parta} />
 
           {/* Sliders row */}
           <div style={{ display: "flex", gap: 20, flexWrap: "wrap", margin: "16px 0" }}>
@@ -973,11 +956,7 @@ function Ch2({ jumpTo }) {
             </div>
           </div>
 
-          <Callout>
-            That's the whole rule! Each row does a "multiply matching parts and add" with the
-            vector to produce one number. Two rows → two outputs → the <span style={{ color: COLORS.gold }}>gold</span> vector on the graph.
-            Try setting the matrix to [1 0 / 0 1] (the "identity") — the output equals the input. The identity matrix does nothing!
-          </Callout>
+          <Markdown src={CONTENT[2].parta_end} />
 
           <div style={{ textAlign: "right", marginTop: 8 }}>
             <button onClick={() => setStep(2)} style={{ ...btnStyle, background: COLORS.cyan + "20", borderColor: COLORS.cyan + "50", color: COLORS.cyan }}>
@@ -990,11 +969,7 @@ function Ch2({ jumpTo }) {
       {/* ===================== STEP 2: One point being transformed ===================== */}
       {step === 2 && (
         <div>
-          <Prose>
-            Now let's <b>see</b> what that multiplication does. The <span style={{ color: COLORS.green }}>green vector</span> is your input.
-            The matrix grabs it and spits out the <span style={{ color: COLORS.gold }}>gold vector</span>.
-            Drag the input around — the matrix transforms every point to a new location.
-          </Prose>
+          <Markdown src={CONTENT[2].partb} />
 
           <div style={{ display: "flex", gap: 16, flexWrap: "wrap" }}>
             <div style={{ flex: "0 0 auto", minWidth: 180 }}>
@@ -1069,12 +1044,7 @@ function Ch2({ jumpTo }) {
             </div>
           </div>
 
-          <Callout>
-            See the <span style={{ color: COLORS.cyan }}>cyan dashed</span> and <span style={{ color: COLORS.magenta }}>pink dashed</span> arrows?
-            The output is <b>x × (first column) + y × (second column)</b>.
-            The matrix's columns are like building blocks — the input vector says how much of each to use.
-            This is the secret of matrix multiplication: it's a <b>recipe</b> for mixing the columns.
-          </Callout>
+          <Markdown src={CONTENT[2].partb_end} />
 
           <div style={{ display: "flex", justifyContent: "space-between", marginTop: 8 }}>
             <button onClick={() => setStep(1)} style={btnStyle}>← Back to the rule</button>
@@ -1088,37 +1058,7 @@ function Ch2({ jumpTo }) {
       {/* ===================== STEP 3: Whole space warp with basis vectors ===================== */}
       {step === 3 && (
         <div>
-          <Definition
-            formal={<>
-              A <b>linear transformation</b> of the plane is a function T that maps every vector to another
-              vector, while respecting two properties: it preserves addition (T(u + v) = T(u) + T(v)) and
-              scalar multiplication (T(k · v) = k · T(v)). Every 2×2 matrix <b>M</b> defines exactly one
-              linear transformation via the rule T(v) = Mv, and every linear transformation arises
-              from a unique 2×2 matrix.
-            </>}
-            playful={<>
-              In plain English: a matrix can <b>stretch</b> space (pull or squish along some direction),
-              <b> rotate</b> it, <b>shear</b> it, or <b>flip</b> it. It can combine these operations.
-              But there's one thing a matrix <i>cannot</i> do on its own: it can never <b>slide</b>
-              (translate) space, because the origin always stays put. We'll unlock translation with a clever
-              trick in Chapter 6 → <button onClick={() => jumpTo && jumpTo(6)}
-                style={{
-                  background: "transparent", border: "none", padding: 0, margin: 0,
-                  color: COLORS.purple, textDecoration: "underline", cursor: "pointer",
-                  fontFamily: "inherit", fontSize: "inherit", fontWeight: 700,
-                }}>Homogeneous Coordinates</button>.
-            </>}
-          />
-
-          <Prose>
-            If a matrix can move <b>one</b> point, it can move <b>every</b> point.
-            Below, every blue dot is an original grid point. The gold dot is where the matrix sends it.
-          </Prose>
-          <Prose>
-            Here's the key insight: you don't need to think about every point.
-            You only need two special vectors: <span style={{ color: COLORS.cyan }}>x̂ = [1, 0]</span> and <span style={{ color: COLORS.magenta }}>ŷ = [0, 1]</span> — the <b>basis vectors</b>.
-            Watch where the matrix sends <i>those two</i>, and everything else follows.
-          </Prose>
+          <Markdown src={CONTENT[2].partc} />
 
           <div style={{ display: "flex", gap: 16, flexWrap: "wrap", margin: "12px 0" }}>
             <div style={{ flex: "0 0 auto", minWidth: 200 }}>
@@ -1238,14 +1178,7 @@ function Ch2({ jumpTo }) {
             </div>
           </div>
 
-          <Callout color={COLORS.gold}>
-            The <span style={{ color: COLORS.cyan }}>dashed cyan</span> is where x̂ used to be; the <span style={{ color: COLORS.cyan }}>bold cyan</span> is where the matrix sends it — and that's just the first column of the matrix!
-            Same for <span style={{ color: COLORS.magenta }}>ŷ and the second column</span>.
-            The entire gold grid is built from these two arrows. Every other point is just some amount of x̂ʼ plus some amount of ŷʼ.
-            <br /><br />
-            Try the presets: <b>Stretch X</b> pulls x̂ further while leaving ŷ alone. <b>Shear</b> tilts ŷ sideways.
-            <b>Flip</b> reverses x̂. <b>Rotate 45°</b> spins both basis vectors together.
-          </Callout>
+          <Markdown src={CONTENT[2].partc_end} />
 
           <div style={{ textAlign: "left", marginTop: 8 }}>
             <button onClick={() => setStep(2)} style={btnStyle}>← Back to one point</button>
