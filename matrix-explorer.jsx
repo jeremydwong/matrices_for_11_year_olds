@@ -375,12 +375,160 @@ function MatrixMultiplyDemo() {
   );
 }
 
+// --- Practice problems: multiply two matrices and check the answer ----------
+// A small read-only matrix grid with brackets.
+function StaticMatrix({ M, color = COLORS.text, size = 42 }) {
+  return (
+    <div style={{ position: "relative", padding: "4px 9px" }}>
+      <div style={{ position: "absolute", left: 0, top: 2, bottom: 2, width: 6, borderLeft: `2px solid ${color}`, borderTop: `2px solid ${color}`, borderBottom: `2px solid ${color}` }} />
+      <div style={{ position: "absolute", right: 0, top: 2, bottom: 2, width: 6, borderRight: `2px solid ${color}`, borderTop: `2px solid ${color}`, borderBottom: `2px solid ${color}` }} />
+      <div style={{ display: "grid", gridTemplateColumns: `repeat(${M[0].length}, ${size}px)`, gap: 5 }}>
+        {M.map((row, i) => row.map((val, j) => (
+          <div key={`${i}-${j}`} style={{
+            width: size, height: size, display: "flex", alignItems: "center", justifyContent: "center",
+            fontFamily: fonts.mono, fontSize: 17, fontWeight: 700, color,
+          }}>{val}</div>
+        )))}
+      </div>
+    </div>
+  );
+}
+
+function PracticeProblem({ A, B }) {
+  const R = A.length, N = A[0].length, Cc = B[0].length;
+  const answer = (i, j) => { let s = 0; for (let k = 0; k < N; k++) s += A[i][k] * B[k][j]; return s; };
+  const blank = () => Array.from({ length: R }, () => Array.from({ length: Cc }, () => ""));
+  const [vals, setVals] = useState(blank);
+  const [checked, setChecked] = useState(false);
+
+  const filled = (i, j) => vals[i][j].trim() !== "" && vals[i][j].trim() !== "-";
+  const cellCorrect = (i, j) => filled(i, j) && parseInt(vals[i][j], 10) === answer(i, j);
+  const allFilled = vals.every((row, i) => row.every((_, j) => filled(i, j)));
+  let nCorrect = 0; for (let i = 0; i < R; i++) for (let j = 0; j < Cc; j++) if (cellCorrect(i, j)) nCorrect++;
+  const total = R * Cc;
+  const allCorrect = nCorrect === total;
+
+  const setCell = (i, j) => (e) => {
+    const next = vals.map((row) => row.slice());
+    next[i][j] = e.target.value;
+    setVals(next);
+    setChecked(false);
+  };
+  const reset = () => { setVals(blank()); setChecked(false); };
+
+  const size = 42;
+  return (
+    <div style={{ margin: "14px 0" }}>
+      <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 4 }}>
+        <StaticMatrix M={A} color={COLORS.gold} size={size} />
+        <div style={{ fontSize: 22, fontWeight: 700, color: COLORS.muted, padding: "0 3px" }}>×</div>
+        <StaticMatrix M={B} color={COLORS.green} size={size} />
+        <div style={{ fontSize: 22, fontWeight: 700, color: COLORS.muted, padding: "0 3px" }}>=</div>
+
+        {/* editable answer grid */}
+        <div style={{ position: "relative", padding: "4px 9px" }}>
+          <div style={{ position: "absolute", left: 0, top: 2, bottom: 2, width: 6, borderLeft: `2px solid ${COLORS.cyan}`, borderTop: `2px solid ${COLORS.cyan}`, borderBottom: `2px solid ${COLORS.cyan}` }} />
+          <div style={{ position: "absolute", right: 0, top: 2, bottom: 2, width: 6, borderRight: `2px solid ${COLORS.cyan}`, borderTop: `2px solid ${COLORS.cyan}`, borderBottom: `2px solid ${COLORS.cyan}` }} />
+          <div style={{ display: "grid", gridTemplateColumns: `repeat(${Cc}, ${size}px)`, gap: 5 }}>
+            {Array.from({ length: R }).map((_, i) => Array.from({ length: Cc }).map((_, j) => {
+              const ok = cellCorrect(i, j);
+              const wrong = checked && filled(i, j) && !ok;
+              const border = ok ? COLORS.green : wrong ? COLORS.magenta : COLORS.border;
+              return (
+                <input key={`${i}-${j}`} type="number" value={vals[i][j]} onChange={setCell(i, j)}
+                  placeholder="?" style={{
+                    width: size, height: size, textAlign: "center",
+                    fontFamily: fonts.mono, fontSize: 17, fontWeight: 700,
+                    color: ok ? COLORS.green : COLORS.text,
+                    background: ok ? `${COLORS.green}14` : wrong ? `${COLORS.magenta}10` : COLORS.surfaceLight,
+                    border: `1.5px solid ${border}`, borderRadius: 6, outline: "none",
+                    transition: "border-color 0.2s, background 0.2s",
+                  }} />
+              );
+            }))}
+          </div>
+        </div>
+      </div>
+
+      {/* shape note for this specific problem */}
+      <div style={{ fontFamily: fonts.mono, fontSize: 12, color: COLORS.muted, marginTop: 8 }}>
+        ({R}×<b style={{ color: COLORS.text }}>{N}</b>) × (<b style={{ color: COLORS.text }}>{N}</b>×{Cc}) &nbsp;→&nbsp; answer is <b style={{ color: COLORS.cyan }}>{R}×{Cc}</b>
+      </div>
+
+      {/* controls + feedback */}
+      <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 8, flexWrap: "wrap" }}>
+        <button onClick={() => setChecked(true)} disabled={!allFilled}
+          style={{
+            padding: "7px 16px", borderRadius: 6, border: `1px solid ${COLORS.cyan}`,
+            background: allFilled ? COLORS.cyan : COLORS.surfaceLight,
+            color: allFilled ? "#fff" : COLORS.muted, fontFamily: "inherit", fontSize: 13,
+            cursor: allFilled ? "pointer" : "default",
+          }}>Check my answer</button>
+        <button onClick={reset} style={{
+          padding: "7px 14px", borderRadius: 6, border: `1px solid ${COLORS.border}`,
+          background: COLORS.surfaceLight, color: COLORS.text, fontFamily: "inherit", fontSize: 13, cursor: "pointer",
+        }}>↺ Clear</button>
+
+        {checked && allCorrect && (
+          <span style={{ color: COLORS.green, fontSize: 14, fontWeight: 600 }}>
+            🎉 Yes! Every cell matches — you multiplied a {R}×{N} by a {N}×{Cc} perfectly. Nicely done!
+          </span>
+        )}
+        {checked && !allCorrect && nCorrect > 0 && (
+          <span style={{ color: COLORS.gold, fontSize: 14 }}>
+            So close — {nCorrect} of {total} right! The green ones are spot on. Re-do the across-and-down for the others. 💪
+          </span>
+        )}
+        {checked && nCorrect === 0 && (
+          <span style={{ color: COLORS.gold, fontSize: 14 }}>
+            Not yet — but that's how learning starts! Take one spot: slide that row across and column down, multiply the pairs, add them. You've got this. 💪
+          </span>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function MatrixMultiplyPractice() {
+  return (
+    <div style={{
+      margin: "20px 0", padding: "18px 18px 20px",
+      background: COLORS.surface, border: `1px solid ${COLORS.border}`, borderRadius: 10,
+    }}>
+      <div style={{ fontSize: 12, color: COLORS.muted, marginBottom: 4, textTransform: "uppercase", letterSpacing: 1 }}>
+        Your turn — work out the answers
+      </div>
+      <Prose>
+        Same "across-and-down" rule, but now <i>you</i> fill in the answer. Do the multiplication in your head (or on paper), type each number into the cyan boxes, and press <b>Check my answer</b>.
+      </Prose>
+
+      <div style={{
+        margin: "10px 0 4px", padding: "10px 14px",
+        background: `${COLORS.cyan}10`, border: `1px solid ${COLORS.cyan}40`, borderRadius: 8,
+        fontSize: 13, lineHeight: 1.7, color: COLORS.text,
+      }}>
+        <b style={{ color: COLORS.cyan }}>The shape trick:</b> write the two sizes side by side, like
+        <span style={{ fontFamily: fonts.mono }}> (R×<b>N</b>)(<b>N</b>×C)</span>. The two <b>inside</b> numbers
+        must be equal — that's <i>why</i> across-and-down works, the row and the column are the same length.
+        The two <b>outside</b> numbers, R and C, become the shape of the answer.
+      </div>
+
+      <div style={{ fontSize: 13, color: COLORS.muted, marginTop: 14, marginBottom: 0, fontWeight: 600 }}>Problem 1 &nbsp;·&nbsp; a 2×2 times a 2×2</div>
+      <PracticeProblem A={[[2, 1], [0, 3]]} B={[[1, 4], [2, 1]]} />
+
+      <div style={{ fontSize: 13, color: COLORS.muted, marginTop: 18, marginBottom: 0, fontWeight: 600 }}>Problem 2 &nbsp;·&nbsp; a 3×3 times a 3×1 (a column)</div>
+      <PracticeProblem A={[[1, 0, 2], [0, 3, 1], [2, 1, 0]]} B={[[2], [1], [3]]} />
+    </div>
+  );
+}
+
 // ==================== CHAPTER 0: INTRODUCTION ====================
 function Ch0() {
   return (
     <div>
       <Markdown src={CONTENT[0].intro} />
       <MatrixMultiplyDemo />
+      <MatrixMultiplyPractice />
     </div>
   );
 }
