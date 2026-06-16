@@ -167,11 +167,220 @@ function Arrow({ x1, y1, x2, y2, color, strokeWidth = 2, dashed = false }) {
   );
 }
 
+// --- Matrix multiplication animation (used on the intro page) ---------------
+// Shows the "across-and-down" mechanic: a ROW of the left matrix is matched,
+// element-by-element, against a COLUMN of the right matrix. Matched pairs share
+// a colour so the eye can see exactly what multiplies with what.
+const PAIR_COLORS = [COLORS.gold, COLORS.green, COLORS.purple, COLORS.orange];
+
+function MatrixMultiplyDemo() {
+  // A is R×N, B is N×C, result C is R×C.  Kept at 2×2 so it stays gentle.
+  const R = 2, N = 2, C = 2;
+  const [A, setA] = useState([[1, 2], [3, 4]]);
+  const [B, setB] = useState([[5, 6], [7, 8]]);
+
+  // tick counts how many result cells are "done". The cell at index === tick
+  // is the one currently being computed (the active cell).
+  const total = R * C;
+  const [tick, setTick] = useState(0);
+  const [playing, setPlaying] = useState(false);
+
+  const active = tick < total ? { i: Math.floor(tick / C), j: tick % C } : null;
+  const isDone = (i, j) => i * C + j < tick;
+  const cellValue = (i, j) => { let s = 0; for (let k = 0; k < N; k++) s += A[i][k] * B[k][j]; return s; };
+
+  const reset = () => { setPlaying(false); setTick(0); };
+  const step = () => { setPlaying(false); setTick((t) => Math.min(total, t + 1)); };
+
+  // Auto-advance while playing.
+  useEffect(() => {
+    if (!playing) return;
+    if (tick >= total) { setPlaying(false); return; }
+    const id = setTimeout(() => setTick((t) => t + 1), 1600);
+    return () => clearTimeout(id);
+  }, [playing, tick, total]);
+
+  const play = () => {
+    if (tick >= total) setTick(0);
+    setPlaying(true);
+  };
+
+  const editCell = (which, i, j) => (e) => {
+    const raw = e.target.value;
+    let v = parseInt(raw, 10);
+    if (isNaN(v)) v = 0;
+    v = Math.max(-9, Math.min(9, v));
+    const setter = which === "A" ? setA : setB;
+    const cur = which === "A" ? A : B;
+    const next = cur.map((row) => row.slice());
+    next[i][j] = v;
+    setter(next);
+    reset();
+  };
+
+  // Highlight colour for a source cell (returns null if not in the active row/col).
+  const srcHighlight = (which, i, j) => {
+    if (!active) return null;
+    if (which === "A" && i === active.i) return PAIR_COLORS[j]; // row of A: colour by inner index j
+    if (which === "B" && j === active.j) return PAIR_COLORS[i]; // col of B: colour by inner index i
+    return null;
+  };
+
+  const cellSize = 46;
+  const gap = 6;
+
+  const SourceMatrix = ({ which, M }) => (
+    <div style={{ position: "relative", padding: "4px 10px" }}>
+      {/* bracket lines */}
+      <div style={{ position: "absolute", left: 0, top: 2, bottom: 2, width: 7, borderLeft: `2px solid ${COLORS.text}`, borderTop: `2px solid ${COLORS.text}`, borderBottom: `2px solid ${COLORS.text}` }} />
+      <div style={{ position: "absolute", right: 0, top: 2, bottom: 2, width: 7, borderRight: `2px solid ${COLORS.text}`, borderTop: `2px solid ${COLORS.text}`, borderBottom: `2px solid ${COLORS.text}` }} />
+      <div style={{ display: "grid", gridTemplateColumns: `repeat(${M[0].length}, ${cellSize}px)`, gap }}>
+        {M.map((row, i) => row.map((val, j) => {
+          const hl = srcHighlight(which, i, j);
+          return (
+            <input key={`${i}-${j}`} type="number" value={val} onChange={editCell(which, i, j)}
+              style={{
+                width: cellSize, height: cellSize, textAlign: "center",
+                fontFamily: fonts.mono, fontSize: 18, fontWeight: 700,
+                color: hl || COLORS.text,
+                background: hl ? `${hl}22` : COLORS.surfaceLight,
+                border: `1.5px solid ${hl || COLORS.border}`,
+                borderRadius: 6, outline: "none",
+                transition: "background 0.3s, border-color 0.3s, color 0.3s",
+              }} />
+          );
+        }))}
+      </div>
+    </div>
+  );
+
+  const ResultMatrix = () => (
+    <div style={{ position: "relative", padding: "4px 10px" }}>
+      <div style={{ position: "absolute", left: 0, top: 2, bottom: 2, width: 7, borderLeft: `2px solid ${COLORS.cyan}`, borderTop: `2px solid ${COLORS.cyan}`, borderBottom: `2px solid ${COLORS.cyan}` }} />
+      <div style={{ position: "absolute", right: 0, top: 2, bottom: 2, width: 7, borderRight: `2px solid ${COLORS.cyan}`, borderTop: `2px solid ${COLORS.cyan}`, borderBottom: `2px solid ${COLORS.cyan}` }} />
+      <div style={{ display: "grid", gridTemplateColumns: `repeat(${C}, ${cellSize}px)`, gap }}>
+        {Array.from({ length: R }).map((_, i) => Array.from({ length: C }).map((_, j) => {
+          const done = isDone(i, j);
+          const isActive = active && active.i === i && active.j === j;
+          return (
+            <div key={`${i}-${j}`} style={{
+              width: cellSize, height: cellSize,
+              display: "flex", alignItems: "center", justifyContent: "center",
+              fontFamily: fonts.mono, fontSize: 18, fontWeight: 700,
+              color: done ? COLORS.cyan : COLORS.muted,
+              background: isActive ? `${COLORS.cyan}18` : COLORS.surfaceLight,
+              border: `1.5px solid ${isActive ? COLORS.cyan : COLORS.border}`,
+              borderRadius: 6,
+              animation: isActive ? "mmpulse 1.3s ease-in-out infinite" : "none",
+            }}>
+              {done ? cellValue(i, j) : (isActive ? "?" : "·")}
+            </div>
+          );
+        }))}
+      </div>
+    </div>
+  );
+
+  const Sign = ({ ch }) => (
+    <div style={{ fontSize: 24, fontWeight: 700, color: COLORS.muted, padding: "0 4px" }}>{ch}</div>
+  );
+
+  const btn = (extra = {}) => ({
+    padding: "7px 14px", borderRadius: 6, border: `1px solid ${COLORS.border}`,
+    background: COLORS.surfaceLight, color: COLORS.text, fontFamily: "inherit",
+    fontSize: 13, cursor: "pointer", ...extra,
+  });
+
+  return (
+    <div style={{
+      margin: "20px 0", padding: "18px 18px 20px",
+      background: COLORS.surface, border: `1px solid ${COLORS.border}`, borderRadius: 10,
+    }}>
+      <style>{`@keyframes mmpulse { 0%,100% { box-shadow: 0 0 0 0 ${COLORS.cyan}55; } 50% { box-shadow: 0 0 0 5px ${COLORS.cyan}00; } }`}</style>
+
+      <div style={{ fontSize: 12, color: COLORS.muted, marginBottom: 4, textTransform: "uppercase", letterSpacing: 1 }}>
+        Try it — how two matrices multiply
+      </div>
+      <Prose>
+        A matrix isn't <i>used</i> by adding — it's used by <b>multiplying</b>. The rule is "<b style={{ color: COLORS.gold }}>across</b> and <b style={{ color: COLORS.gold }}>down</b>": slide a <b>row</b> of the left matrix across, and a <b>column</b> of the right matrix down. Multiply the matching pairs (same colour!), then add them up. That single number lands in the matching spot of the answer.
+      </Prose>
+
+      {/* The three matrices */}
+      <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", justifyContent: "center", gap: 4, margin: "16px 0 6px" }}>
+        <SourceMatrix which="A" M={A} />
+        <Sign ch="×" />
+        <SourceMatrix which="B" M={B} />
+        <Sign ch="=" />
+        <ResultMatrix />
+      </div>
+
+      {/* The running calculation for the active cell */}
+      <div style={{
+        minHeight: 58, margin: "10px 0 14px", padding: "10px 14px",
+        background: COLORS.surfaceLight, border: `1px solid ${COLORS.border}`, borderRadius: 8,
+        fontFamily: fonts.mono, fontSize: 15, lineHeight: 1.7,
+        display: "flex", flexDirection: "column", justifyContent: "center",
+      }}>
+        {active ? (() => {
+          const { i, j } = active;
+          const terms = Array.from({ length: N }).map((_, k) => ({
+            a: A[i][k], b: B[k][j], color: PAIR_COLORS[k],
+          }));
+          return (
+            <>
+              <div style={{ color: COLORS.muted, fontSize: 12, marginBottom: 4 }}>
+                row {i + 1} across &nbsp;·&nbsp; column {j + 1} down &nbsp;→&nbsp; goes in spot (row {i + 1}, col {j + 1})
+              </div>
+              <div>
+                {terms.map((t, k) => (
+                  <span key={k}>
+                    {k > 0 && <span style={{ color: COLORS.muted }}> + </span>}
+                    <span style={{ color: t.color, fontWeight: 700 }}>{t.a}</span>
+                    <span style={{ color: COLORS.muted }}>×</span>
+                    <span style={{ color: t.color, fontWeight: 700 }}>{t.b}</span>
+                  </span>
+                ))}
+                <span style={{ color: COLORS.muted }}>{"  =  "}</span>
+                {terms.map((t, k) => (
+                  <span key={k}>
+                    {k > 0 && <span style={{ color: COLORS.muted }}> + </span>}
+                    <span style={{ color: t.color }}>{t.a * t.b}</span>
+                  </span>
+                ))}
+                <span style={{ color: COLORS.muted }}>{"  =  "}</span>
+                <b style={{ color: COLORS.cyan, fontSize: 17 }}>{cellValue(i, j)}</b>
+              </div>
+            </>
+          );
+        })() : (
+          <div style={{ color: COLORS.muted, fontStyle: "italic" }}>
+            All four spots filled in! Edit any number above, or press Reset to watch again.
+          </div>
+        )}
+      </div>
+
+      {/* Controls */}
+      <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+        {playing ? (
+          <button onClick={() => setPlaying(false)} style={btn({ background: COLORS.cyan, color: "#fff", borderColor: COLORS.cyan })}>⏸ Pause</button>
+        ) : (
+          <button onClick={play} style={btn({ background: COLORS.cyan, color: "#fff", borderColor: COLORS.cyan })}>▶ {tick >= total ? "Play again" : tick === 0 ? "Play" : "Resume"}</button>
+        )}
+        <button onClick={step} disabled={tick >= total} style={btn({ opacity: tick >= total ? 0.5 : 1, cursor: tick >= total ? "default" : "pointer" })}>Step ▸</button>
+        <button onClick={reset} style={btn()}>↺ Reset</button>
+        <div style={{ flex: 1 }} />
+        <div style={{ alignSelf: "center", fontSize: 12, color: COLORS.muted }}>{Math.min(tick, total)} / {total} spots filled</div>
+      </div>
+    </div>
+  );
+}
+
 // ==================== CHAPTER 0: INTRODUCTION ====================
 function Ch0() {
   return (
     <div>
       <Markdown src={CONTENT[0].intro} />
+      <MatrixMultiplyDemo />
     </div>
   );
 }
