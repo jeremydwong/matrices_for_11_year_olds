@@ -2,6 +2,19 @@
 
 This is a React app where the **interactive widgets** live in `matrix-explorer.jsx` and the **prose text** lives in plain Markdown files under `content/`. You can rewrite, expand, or reorganize any chapter's text without touching React.
 
+## Style
+
+The visual design derives from the reference stylesheets in `styles/reference/`
+(`normalize.css`, Skeleton, `custom.css`) — dark `#242424`, Raleway, `#33C3F0`
+accent, the blue navbar, and the light/dark toggle switch — matching the sibling
+sites (`fractions_for_6_year_olds`, `imaginary_numbers_for_11_year_olds`,
+`quaternions_for_teenagers`). `theme.js` documents which token comes from which
+rule; `styles/site.css` explains why `custom.css` isn't imported wholesale (its
+bare `label`/`input` rules would hide the widget sliders) and scopes the pieces
+used. The sticky navbar sits on top with the title below it, and light mode is
+scoped to the content region so the navbar stays blue and the toggle stays
+yellow. `theme-orig.js` keeps the original dark palette for reference.
+
 ## File layout
 
 ```

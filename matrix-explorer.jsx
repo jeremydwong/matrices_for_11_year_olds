@@ -3735,8 +3735,11 @@ const chapterData = [
 // ==================== MAIN APP ====================
 export default function MatrixExplorer() {
   const [chapter, setChapter] = useState(0);
+  const [light, setLight] = useState(false);
   const ch = chapterData[chapter];
   const Comp = ch.component;
+
+  useEffect(() => { document.body.classList.toggle("light-mode", light); }, [light]);
 
   // Jump helper: find chapter by num and switch to it. Used for cross-chapter links
   // like Ch 2 pointing forward to Ch 6.
@@ -3750,54 +3753,41 @@ export default function MatrixExplorer() {
   }, []);
 
   return (
-    <div style={{
-      minHeight: "100vh", background: COLORS.bg, color: COLORS.text,
-      fontFamily: "'DM Sans', 'Segoe UI', system-ui, sans-serif",
-    }}>
+    <div style={{ minHeight: "100vh", color: COLORS.text }}>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Space+Mono:wght@400;700&display=swap');
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        input[type=range] { -webkit-appearance: none; background: ${COLORS.border}; border-radius: 4px; outline: none; }
-        input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 14px; height: 14px; border-radius: 50%; cursor: pointer; }
         input[type=number] { outline: none; }
         input[type=number]:focus { border-color: ${COLORS.cyan}; }
-        button:hover { filter: brightness(1.2); }
+        button:hover { filter: brightness(1.15); }
         ::selection { background: ${COLORS.cyan}40; }
       `}</style>
 
-      {/* Header */}
-      <header style={{
-        padding: "20px 24px 16px", borderBottom: `1px solid ${COLORS.border}`,
-        background: COLORS.surface,
-      }}>
-        <h1 style={{
-          fontSize: 22, fontWeight: 700, letterSpacing: -0.5,
-          background: `linear-gradient(135deg, ${COLORS.cyan}, ${COLORS.gold})`,
-          WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent",
-        }}>
-          Applications for Vectors and Matrices
-        </h1>
-      </header>
-
-      {/* Chapter nav */}
-      <nav style={{
-        display: "flex", gap: 0, overflowX: "auto", borderBottom: `1px solid ${COLORS.border}`,
-        background: COLORS.surface,
-      }}>
-        {chapterData.map((c, i) => (
-          <button key={i} onClick={() => setChapter(i)}
-            style={{
-              padding: "10px 14px", fontSize: 12, background: "transparent",
-              border: "none", borderBottom: `2px solid ${i === chapter ? c.color : "transparent"}`,
-              color: i === chapter ? c.color : COLORS.muted,
-              cursor: "pointer", whiteSpace: "nowrap", fontFamily: "inherit",
-              fontWeight: i === chapter ? 700 : 400,
-              transition: "all 0.15s",
-            }}>
-            {c.num}. {c.title}
-          </button>
-        ))}
+      {/* Sticky nav on top, toggle pinned at its right end — mirrors the fixed
+          navbar on jeremydwong.github.io. The title sits BELOW it, in .app-body. */}
+      <nav className="site-navbar">
+        <div className="nav-scroll">
+          {chapterData.map((c, i) => (
+            <button key={i} className={i === chapter ? "active" : ""} onClick={() => setChapter(i)}
+              style={{ borderBottom: `3px solid ${i === chapter ? "#33C3F0" : "transparent"}` }}>
+              {c.num}. {c.title}
+            </button>
+          ))}
+        </div>
+        <div className="toggle-container">
+          <input id="theme-toggle" type="checkbox" checked={light} onChange={(e) => setLight(e.target.checked)} />
+          <label htmlFor="theme-toggle" aria-label="Toggle light mode" />
+        </div>
       </nav>
+
+      {/* Content region — the only part that flips in light mode (keeps the
+          blue navbar + yellow toggle true, and keeps the navbar sticky). */}
+      <div className="app-body">
+        <header style={{
+          padding: "26px 24px 20px", borderBottom: `1px solid ${COLORS.border}`, background: COLORS.surface,
+        }}>
+          <h1 className="docs-header" style={{ color: COLORS.text, fontSize: "2rem", margin: 0 }}>
+            Applications for <span style={{ color: COLORS.cyan }}>Vectors &amp; Matrices</span>
+          </h1>
+        </header>
 
       {/* Chapter content */}
       <main style={{ maxWidth: 800, margin: "0 auto", padding: "24px 20px 48px" }}>
@@ -3826,6 +3816,7 @@ export default function MatrixExplorer() {
           </button>
         </div>
       </main>
+      </div>
     </div>
   );
 }
