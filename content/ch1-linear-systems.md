@@ -19,8 +19,6 @@ So how does the matrix "contain" those two equations? There's a rule — **matri
 
 :::definition
 To multiply a matrix by another matrix (or vector): take one **row** of the matrix, go across it left to right, and multiply each entry by the matching entry going **down** a column vector (or in our case with the xs and ys, just the vector itself. A Vector is just like an Nx1 matrix, really, where N is the number of rows). Add those products together. That gives you one number in the result. Repeat for every row.
-
-Note then that this gives you a check to see if that multiplication even makes any sense! the middle two dimensions of two matrices have to be the same, or you can't multiply them. 
 :::playful
 Across the row, down the column, multiply and add. Each row produces one number in the answer.
 :::end
@@ -34,6 +32,18 @@ So matrix multiplication is the bridge between the compact grid and the pair of 
 
 :::callout color=muted
 This "across-and-down" rule also works for multiplying two full matrices together (not just a matrix times a vector). Each row of the left matrix gets paired with each column of the right matrix. We'll see that later — for now, one column (a vector) is enough.
+:::end
+
+## The size check — something genuinely new is happening
+
+Stop and notice something. Up to now, every multiplication in your life has been between things of the **same kind**: a number times a number. Matrices are the first time you're multiplying two objects that can have **different sizes** — a 2×2 grid times a 2×1 column, say. That's a real upgrade, and it comes with one new responsibility: not every pair of matrices *can* be multiplied. So whenever you read two matrices standing next to each other, do the quick ritual that every mathematician, physicist, and game programmer does silently, every time:
+
+1. Write the two shapes side by side: {{(2×2)(2×1)}}.
+2. Look at the two numbers in the **middle**. They must **match**. (That's the row going *across* meeting the column going *down* — they have to be the same length, or the pairs don't pair up.)
+3. If they match, cross them out. The two **outer** numbers that remain are the shape of the answer: {{2×1}}.
+
+:::callout color=cyan
+**Middle numbers must match. Outer numbers are the shape of the answer.** If the middle numbers don't match, the multiplication simply doesn't exist — this isn't a rule someone invented to annoy you, it's the across-and-down rule protecting itself. Try to break it below.
 :::end
 
 # outro

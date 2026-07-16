@@ -25,5 +25,5 @@ The person starts in the **Lobby**. Click **Hop** to advance one minute. Mathema
 :::minor
 - The **Markov property** is "memoryless": only the current state matters; the path taken to get here is irrelevant.
 - The steady state doesn't depend on where you started, provided every state can eventually reach every other one.
-- Google's **PageRank** is exactly this construction: a giant Markov chain over the web whose steady state ranks pages by importance.
+- Google's **PageRank** is exactly this construction: a giant Markov chain over the web whose steady state ranks pages by importance. That's the entire next chapter.
 :::end

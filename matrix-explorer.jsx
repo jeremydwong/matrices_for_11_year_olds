@@ -11,8 +11,12 @@ import ch4Md from "./content/ch4-rotations.md?raw";
 import ch5Md from "./content/ch5-determinants.md?raw";
 import ch6Md from "./content/ch6-homogeneous.md?raw";
 import ch7Md from "./content/ch7-markov-chains.md?raw";
-import ch8Md from "./content/ch8-neural-networks.md?raw";
-import ch9Md from "./content/ch9-summary.md?raw";
+import ch8Md from "./content/ch8-pagerank.md?raw";
+import ch9Md from "./content/ch9-pca.md?raw";
+import ch10Md from "./content/ch10-neural-networks.md?raw";
+import ch11Md from "./content/ch11-summary.md?raw";
+
+import { DATA as FRAM_DATA, VARS as FRAM_VARS, VAR_LABELS as FRAM_LABELS } from "./content/data/framingham.js";
 
 // Split a chapter's MD file on `# intro` / `# outro` headers.
 // Returns { intro: string, outro: string }, either of which may be empty.
@@ -45,6 +49,8 @@ const CONTENT = {
   7: splitMd(ch7Md),
   8: splitMd(ch8Md),
   9: splitMd(ch9Md),
+  10: splitMd(ch10Md),
+  11: splitMd(ch11Md),
 };
 
 import { colors as COLORS, fonts } from "./theme.js";
@@ -226,22 +232,17 @@ function MatrixMultiplyDemo() {
     return null;
   };
 
-  const cellSize = 46;
-  const gap = 6;
-
   const SourceMatrix = ({ which, M }) => (
-    <div style={{ position: "relative", padding: "4px 10px" }}>
-      {/* bracket lines */}
-      <div style={{ position: "absolute", left: 0, top: 2, bottom: 2, width: 7, borderLeft: `2px solid ${COLORS.text}`, borderTop: `2px solid ${COLORS.text}`, borderBottom: `2px solid ${COLORS.text}` }} />
-      <div style={{ position: "absolute", right: 0, top: 2, bottom: 2, width: 7, borderRight: `2px solid ${COLORS.text}`, borderTop: `2px solid ${COLORS.text}`, borderBottom: `2px solid ${COLORS.text}` }} />
-      <div style={{ display: "grid", gridTemplateColumns: `repeat(${M[0].length}, ${cellSize}px)`, gap }}>
+    <div className="matrix" style={{ "--mx-color": COLORS.text }}>
+      <span className="mx-bracket left" />
+      <span className="mx-bracket right" />
+      <div className="mx-grid" style={{ gridTemplateColumns: `repeat(${M[0].length}, var(--mx-cell))` }}>
         {M.map((row, i) => row.map((val, j) => {
           const hl = srcHighlight(which, i, j);
           return (
-            <input key={`${i}-${j}`} type="number" value={val} onChange={editCell(which, i, j)}
+            <input key={`${i}-${j}`} type="number" className="mx-cell" data-len={String(val).length}
+              value={val} onChange={editCell(which, i, j)}
               style={{
-                width: cellSize, height: cellSize, textAlign: "center",
-                fontFamily: fonts.mono, fontSize: 18, fontWeight: 700,
                 color: hl || COLORS.text,
                 background: hl ? `${hl}22` : COLORS.surfaceLight,
                 border: `1.5px solid ${hl || COLORS.border}`,
@@ -255,25 +256,23 @@ function MatrixMultiplyDemo() {
   );
 
   const ResultMatrix = () => (
-    <div style={{ position: "relative", padding: "4px 10px" }}>
-      <div style={{ position: "absolute", left: 0, top: 2, bottom: 2, width: 7, borderLeft: `2px solid ${COLORS.cyan}`, borderTop: `2px solid ${COLORS.cyan}`, borderBottom: `2px solid ${COLORS.cyan}` }} />
-      <div style={{ position: "absolute", right: 0, top: 2, bottom: 2, width: 7, borderRight: `2px solid ${COLORS.cyan}`, borderTop: `2px solid ${COLORS.cyan}`, borderBottom: `2px solid ${COLORS.cyan}` }} />
-      <div style={{ display: "grid", gridTemplateColumns: `repeat(${C}, ${cellSize}px)`, gap }}>
+    <div className="matrix" style={{ "--mx-color": COLORS.cyan }}>
+      <span className="mx-bracket left" />
+      <span className="mx-bracket right" />
+      <div className="mx-grid" style={{ gridTemplateColumns: `repeat(${C}, var(--mx-cell))` }}>
         {Array.from({ length: R }).map((_, i) => Array.from({ length: C }).map((_, j) => {
           const done = isDone(i, j);
           const isActive = active && active.i === i && active.j === j;
+          const shown = done ? String(cellValue(i, j)) : (isActive ? "?" : "·");
           return (
-            <div key={`${i}-${j}`} style={{
-              width: cellSize, height: cellSize,
-              display: "flex", alignItems: "center", justifyContent: "center",
-              fontFamily: fonts.mono, fontSize: 18, fontWeight: 700,
+            <div key={`${i}-${j}`} className="mx-cell" data-len={shown.length} style={{
               color: done ? COLORS.cyan : COLORS.muted,
               background: isActive ? `${COLORS.cyan}18` : COLORS.surfaceLight,
               border: `1.5px solid ${isActive ? COLORS.cyan : COLORS.border}`,
               borderRadius: 6,
               animation: isActive ? "mmpulse 1.3s ease-in-out infinite" : "none",
             }}>
-              {done ? cellValue(i, j) : (isActive ? "?" : "·")}
+              {shown}
             </div>
           );
         }))}
@@ -282,7 +281,7 @@ function MatrixMultiplyDemo() {
   );
 
   const Sign = ({ ch }) => (
-    <div style={{ fontSize: 24, fontWeight: 700, color: COLORS.muted, padding: "0 4px" }}>{ch}</div>
+    <div className="mx-sign" style={{ color: COLORS.muted }}>{ch}</div>
   );
 
   const btn = (extra = {}) => ({
@@ -306,7 +305,7 @@ function MatrixMultiplyDemo() {
       </Prose>
 
       {/* The three matrices */}
-      <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", justifyContent: "center", gap: 4, margin: "16px 0 6px" }}>
+      <div className="mx-row" style={{ margin: "16px 0 6px" }}>
         <SourceMatrix which="A" M={A} />
         <Sign ch="×" />
         <SourceMatrix which="B" M={B} />
@@ -377,17 +376,14 @@ function MatrixMultiplyDemo() {
 
 // --- Practice problems: multiply two matrices and check the answer ----------
 // A small read-only matrix grid with brackets.
-function StaticMatrix({ M, color = COLORS.text, size = 42 }) {
+function StaticMatrix({ M, color = COLORS.text }) {
   return (
-    <div style={{ position: "relative", padding: "4px 9px" }}>
-      <div style={{ position: "absolute", left: 0, top: 2, bottom: 2, width: 6, borderLeft: `2px solid ${color}`, borderTop: `2px solid ${color}`, borderBottom: `2px solid ${color}` }} />
-      <div style={{ position: "absolute", right: 0, top: 2, bottom: 2, width: 6, borderRight: `2px solid ${color}`, borderTop: `2px solid ${color}`, borderBottom: `2px solid ${color}` }} />
-      <div style={{ display: "grid", gridTemplateColumns: `repeat(${M[0].length}, ${size}px)`, gap: 5 }}>
+    <div className="matrix" style={{ "--mx-color": color }}>
+      <span className="mx-bracket left" />
+      <span className="mx-bracket right" />
+      <div className="mx-grid" style={{ gridTemplateColumns: `repeat(${M[0].length}, var(--mx-cell))` }}>
         {M.map((row, i) => row.map((val, j) => (
-          <div key={`${i}-${j}`} style={{
-            width: size, height: size, display: "flex", alignItems: "center", justifyContent: "center",
-            fontFamily: fonts.mono, fontSize: 17, fontWeight: 700, color,
-          }}>{val}</div>
+          <div key={`${i}-${j}`} className="mx-cell" data-len={String(val).length} style={{ color }}>{val}</div>
         )))}
       </div>
     </div>
@@ -416,29 +412,27 @@ function PracticeProblem({ A, B }) {
   };
   const reset = () => { setVals(blank()); setChecked(false); };
 
-  const size = 42;
   return (
     <div style={{ margin: "14px 0" }}>
-      <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 4 }}>
-        <StaticMatrix M={A} color={COLORS.gold} size={size} />
-        <div style={{ fontSize: 22, fontWeight: 700, color: COLORS.muted, padding: "0 3px" }}>×</div>
-        <StaticMatrix M={B} color={COLORS.green} size={size} />
-        <div style={{ fontSize: 22, fontWeight: 700, color: COLORS.muted, padding: "0 3px" }}>=</div>
+      <div className="mx-row" style={{ justifyContent: "flex-start" }}>
+        <StaticMatrix M={A} color={COLORS.gold} />
+        <div className="mx-sign" style={{ color: COLORS.muted }}>×</div>
+        <StaticMatrix M={B} color={COLORS.green} />
+        <div className="mx-sign" style={{ color: COLORS.muted }}>=</div>
 
         {/* editable answer grid */}
-        <div style={{ position: "relative", padding: "4px 9px" }}>
-          <div style={{ position: "absolute", left: 0, top: 2, bottom: 2, width: 6, borderLeft: `2px solid ${COLORS.cyan}`, borderTop: `2px solid ${COLORS.cyan}`, borderBottom: `2px solid ${COLORS.cyan}` }} />
-          <div style={{ position: "absolute", right: 0, top: 2, bottom: 2, width: 6, borderRight: `2px solid ${COLORS.cyan}`, borderTop: `2px solid ${COLORS.cyan}`, borderBottom: `2px solid ${COLORS.cyan}` }} />
-          <div style={{ display: "grid", gridTemplateColumns: `repeat(${Cc}, ${size}px)`, gap: 5 }}>
+        <div className="matrix" style={{ "--mx-color": COLORS.cyan }}>
+          <span className="mx-bracket left" />
+          <span className="mx-bracket right" />
+          <div className="mx-grid" style={{ gridTemplateColumns: `repeat(${Cc}, var(--mx-cell))` }}>
             {Array.from({ length: R }).map((_, i) => Array.from({ length: Cc }).map((_, j) => {
               const ok = cellCorrect(i, j);
               const wrong = checked && filled(i, j) && !ok;
               const border = ok ? COLORS.green : wrong ? COLORS.magenta : COLORS.border;
               return (
-                <input key={`${i}-${j}`} type="number" value={vals[i][j]} onChange={setCell(i, j)}
+                <input key={`${i}-${j}`} type="number" className="mx-cell" data-len={Math.max(1, vals[i][j].length)}
+                  value={vals[i][j]} onChange={setCell(i, j)}
                   placeholder="?" style={{
-                    width: size, height: size, textAlign: "center",
-                    fontFamily: fonts.mono, fontSize: 17, fontWeight: 700,
                     color: ok ? COLORS.green : COLORS.text,
                     background: ok ? `${COLORS.green}14` : wrong ? `${COLORS.magenta}10` : COLORS.surfaceLight,
                     border: `1.5px solid ${border}`, borderRadius: 6, outline: "none",
@@ -529,6 +523,106 @@ function Ch0() {
       <Markdown src={CONTENT[0].intro} />
       <MatrixMultiplyDemo />
       <MatrixMultiplyPractice />
+    </div>
+  );
+}
+
+// --- Size-check widget (Ch 1): pick two shapes, see whether they multiply ---
+function SizeCheckWidget() {
+  const [aR, setAR] = useState(2); const [aC, setAC] = useState(2);
+  const [bR, setBR] = useState(2); const [bC, setBC] = useState(1);
+  const ok = aC === bR;
+
+  const miniBtn = {
+    width: 20, height: 20, padding: 0, lineHeight: 1, fontSize: 13,
+    background: COLORS.surfaceLight, border: `1px solid ${COLORS.border}`,
+    borderRadius: 4, color: COLORS.text, cursor: "pointer", fontFamily: fonts.mono,
+  };
+  const Stepper = ({ v, set, color }) => (
+    <span style={{ display: "inline-flex", alignItems: "center", gap: 3 }}>
+      <button onClick={() => set(Math.max(1, v - 1))} style={miniBtn}>−</button>
+      <b style={{ color, fontFamily: fonts.mono, fontSize: 16, minWidth: 14, textAlign: "center" }}>{v}</b>
+      <button onClick={() => set(Math.min(4, v + 1))} style={miniBtn}>+</button>
+    </span>
+  );
+  // A ghost matrix: just dots, so the shape is the whole point.
+  const Ghost = ({ r, c, color }) => (
+    <div className="matrix" style={{ "--mx-cell": "22px", "--mx-color": color }}>
+      <span className="mx-bracket left" />
+      <span className="mx-bracket right" />
+      <div className="mx-grid" style={{ gridTemplateColumns: `repeat(${c}, var(--mx-cell))` }}>
+        {Array.from({ length: r * c }).map((_, i) => (
+          <div key={i} className="mx-cell" style={{ color, opacity: 0.75 }}>·</div>
+        ))}
+      </div>
+    </div>
+  );
+
+  const midStyle = (good) => ({
+    color: good ? COLORS.green : COLORS.magenta,
+    fontWeight: 700,
+    borderBottom: `2px solid ${good ? COLORS.green : COLORS.magenta}`,
+  });
+
+  return (
+    <div style={{
+      margin: "20px 0", padding: "18px 18px 20px",
+      background: COLORS.surface, border: `1px solid ${COLORS.border}`, borderRadius: 10,
+    }}>
+      <div style={{ fontSize: 12, color: COLORS.muted, marginBottom: 4, textTransform: "uppercase", letterSpacing: 1 }}>
+        Try it — the size check
+      </div>
+      <Prose>
+        Set the two shapes with the +/− buttons and watch the check happen. The <b>middle</b> two numbers are the ones being compared; the <b>outer</b> two become the answer's shape.
+      </Prose>
+
+      {/* Shape controls */}
+      <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", justifyContent: "center", gap: 10, margin: "14px 0" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 6, fontFamily: fonts.mono, fontSize: 15, color: COLORS.text }}>
+          <span style={{ color: COLORS.muted }}>(</span>
+          <Stepper v={aR} set={setAR} color={COLORS.gold} />
+          <span style={{ color: COLORS.muted }}>×</span>
+          <Stepper v={aC} set={setAC} color={ok ? COLORS.green : COLORS.magenta} />
+          <span style={{ color: COLORS.muted }}>)</span>
+          <span style={{ color: COLORS.muted, padding: "0 2px" }}>(</span>
+          <Stepper v={bR} set={setBR} color={ok ? COLORS.green : COLORS.magenta} />
+          <span style={{ color: COLORS.muted }}>×</span>
+          <Stepper v={bC} set={setBC} color={COLORS.gold} />
+          <span style={{ color: COLORS.muted }}>)</span>
+        </div>
+      </div>
+
+      {/* The matrices themselves */}
+      <div className="mx-row" style={{ marginBottom: 12 }}>
+        <Ghost r={aR} c={aC} color={COLORS.text} />
+        <div className="mx-sign" style={{ color: COLORS.muted }}>×</div>
+        <Ghost r={bR} c={bC} color={COLORS.text} />
+        <div className="mx-sign" style={{ color: COLORS.muted }}>=</div>
+        {ok ? (
+          <Ghost r={aR} c={bC} color={COLORS.cyan} />
+        ) : (
+          <div style={{ fontSize: 26, color: COLORS.magenta, fontWeight: 700, padding: "0 6px" }}>∄</div>
+        )}
+      </div>
+
+      {/* The verdict */}
+      <div style={{
+        padding: "10px 14px", borderRadius: 8, fontSize: 14, lineHeight: 1.7,
+        background: ok ? `${COLORS.green}10` : `${COLORS.magenta}10`,
+        border: `1px solid ${ok ? COLORS.green : COLORS.magenta}40`,
+        fontFamily: fonts.mono,
+      }}>
+        ({aR}×<span style={midStyle(ok)}>{aC}</span>)(<span style={midStyle(ok)}>{bR}</span>×{bC}){" "}
+        {ok ? (
+          <span style={{ color: COLORS.green }}>
+            → middle numbers match ({aC} = {bR}) ✓ — the answer will be <b>{aR}×{bC}</b>
+          </span>
+        ) : (
+          <span style={{ color: COLORS.magenta }}>
+            → middle numbers don't match ({aC} ≠ {bR}) ✗ — this multiplication doesn't exist
+          </span>
+        )}
+      </div>
     </div>
   );
 }
@@ -719,6 +813,8 @@ function Ch1() {
       </Callout>
 
       <Markdown src={CONTENT[1].middle} />
+
+      <SizeCheckWidget />
 
       {/* ========== Manual algebra walkthrough ========== */}
       <ManualAlgebraWalkthrough a={a} b={b} c={c} d={d} e={e} f={f} x={x} y={y} det={det} />
@@ -2988,7 +3084,571 @@ const btnStyle = {
   fontFamily: fonts.mono,
 };
 
-// ==================== CHAPTER 8: NEURAL NETWORKS ====================
+// ==================== CHAPTER 8: PAGERANK & EIGENVECTORS ====================
+
+// --- Eigenvector "resonance" explorer: sweep a vector, find the directions ---
+// the matrix doesn't turn. Presets chosen to show that eigen-axes are usually
+// NOT orthogonal (lean), sometimes are (symmetric), and sometimes don't exist
+// at all (pure rotation).
+const EIGEN_PRESETS = [
+  { name: "Leaning stretch", m: [[2, 1], [0, 1]], note: "two resonance axes, NOT at right angles" },
+  { name: "Symmetric", m: [[2, 1], [1, 1]], note: "symmetric matrix — its axes ARE perpendicular" },
+  { name: "Pure spin", m: [[0, -1], [1, 0]], note: "a rotation turns every direction — no resonance at all!" },
+];
+
+// Real eigenvectors of a 2×2, or [] if complex.
+function eigen2x2([[a, b], [c, d]]) {
+  const tr = a + d, det = a * d - b * c;
+  const disc = tr * tr - 4 * det;
+  if (disc < 0) return [];
+  const s = Math.sqrt(disc);
+  return [(tr + s) / 2, (tr - s) / 2].map(lam => {
+    let v;
+    if (Math.abs(b) > 1e-9) v = [b, lam - a];
+    else if (Math.abs(c) > 1e-9) v = [lam - d, c];
+    else v = Math.abs(a - lam) < 1e-9 ? [1, 0] : [0, 1];
+    const n = Math.hypot(v[0], v[1]) || 1;
+    return { lam, v: [v[0] / n, v[1] / n] };
+  });
+}
+
+function EigenExplorer() {
+  const [preset, setPreset] = useState(0);
+  const [thetaDeg, setThetaDeg] = useState(20);
+  const [reveal, setReveal] = useState(false);
+
+  const M = EIGEN_PRESETS[preset].m;
+  const th = (thetaDeg * Math.PI) / 180;
+  const v = [Math.cos(th), Math.sin(th)];
+  const Av = [M[0][0] * v[0] + M[0][1] * v[1], M[1][0] * v[0] + M[1][1] * v[1]];
+  const lenAv = Math.hypot(Av[0], Av[1]);
+  // Parallel test: cross product near zero (direction, not sign, is what counts).
+  const cross = v[0] * Av[1] - v[1] * Av[0];
+  const aligned = lenAv > 1e-6 && Math.abs(cross) / lenAv < 0.035;
+  const lambda = v[0] * Av[0] + v[1] * Av[1]; // = λ when aligned, since |v| = 1
+
+  const eig = eigen2x2(M);
+  // Angle between the two eigen-directions (if two distinct ones exist)
+  const eigAngle = eig.length === 2
+    ? Math.acos(Math.min(1, Math.abs(eig[0].v[0] * eig[1].v[0] + eig[0].v[1] * eig[1].v[1]))) * 180 / Math.PI
+    : null;
+
+  return (
+    <div style={{
+      margin: "20px 0", padding: "18px 18px 20px",
+      background: COLORS.surface, border: `1px solid ${COLORS.border}`, borderRadius: 10,
+    }}>
+      <div style={{ fontSize: 12, color: COLORS.muted, marginBottom: 8, textTransform: "uppercase", letterSpacing: 1 }}>
+        Try it — hunt for the resonance directions
+      </div>
+
+      {/* Presets */}
+      <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 10 }}>
+        {EIGEN_PRESETS.map((p, i) => (
+          <button key={i} onClick={() => { setPreset(i); setReveal(false); }}
+            style={{
+              ...btnStyle,
+              background: preset === i ? COLORS.purple + "30" : COLORS.surfaceLight,
+              borderColor: preset === i ? COLORS.purple : COLORS.border,
+              color: preset === i ? COLORS.purple : COLORS.text,
+            }}>
+            {p.name}
+          </button>
+        ))}
+      </div>
+
+      <div style={{ display: "flex", gap: 16, flexWrap: "wrap", alignItems: "flex-start" }}>
+        <div style={{ flex: "1 1 300px", minWidth: 280 }}>
+          <SVGCanvas width={360} height={360} xRange={[-3, 3]} yRange={[-3, 3]}>
+            {(w, h, xR, yR) => {
+              const O = m2s(0, 0, w, h, xR, yR);
+              const P = m2s(v[0] * 1.5, v[1] * 1.5, w, h, xR, yR);
+              const Q = m2s(Av[0], Av[1], w, h, xR, yR);
+              return (
+                <g>
+                  {/* Eigen-axes, revealed */}
+                  {reveal && eig.map((e, i) => {
+                    const A1 = m2s(e.v[0] * 4, e.v[1] * 4, w, h, xR, yR);
+                    const A2 = m2s(-e.v[0] * 4, -e.v[1] * 4, w, h, xR, yR);
+                    return <line key={i} x1={A1[0]} y1={A1[1]} x2={A2[0]} y2={A2[1]}
+                      stroke={COLORS.green} strokeWidth={1.5} strokeDasharray="6 5" opacity={0.65} />;
+                  })}
+                  <Arrow x1={O[0]} y1={O[1]} x2={Q[0]} y2={Q[1]} color={COLORS.gold} strokeWidth={2.5} />
+                  <Arrow x1={O[0]} y1={O[1]} x2={P[0]} y2={P[1]} color={aligned ? COLORS.green : COLORS.cyan} strokeWidth={2.5} />
+                  <text x={P[0] + 8} y={P[1] - 6} fill={aligned ? COLORS.green : COLORS.cyan} fontSize={13} fontFamily={fonts.mono} fontWeight={700}>v</text>
+                  <text x={Q[0] + 8} y={Q[1] + 12} fill={COLORS.gold} fontSize={13} fontFamily={fonts.mono} fontWeight={700}>Av</text>
+                </g>
+              );
+            }}
+          </SVGCanvas>
+        </div>
+
+        <div style={{ flex: "1 1 260px", minWidth: 250 }}>
+          {/* The matrix */}
+          <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 12 }}>
+            <span style={{ fontFamily: fonts.mono, color: COLORS.text, fontSize: 14 }}>A =</span>
+            <div className="matrix" style={{ "--mx-cell": "34px", "--mx-color": COLORS.purple }}>
+              <span className="mx-bracket left" />
+              <span className="mx-bracket right" />
+              <div className="mx-grid" style={{ gridTemplateColumns: "repeat(2, var(--mx-cell))" }}>
+                {M.flat().map((val, i) => (
+                  <div key={i} className="mx-cell" data-len={String(val).length} style={{ color: COLORS.text }}>{val}</div>
+                ))}
+              </div>
+            </div>
+            <span style={{ fontSize: 11, color: COLORS.muted, fontStyle: "italic" }}>{EIGEN_PRESETS[preset].note}</span>
+          </div>
+
+          <Slider label="direction θ" value={thetaDeg} onChange={setThetaDeg} min={0} max={180} step={0.5} color={COLORS.cyan} />
+
+          <div style={{
+            marginTop: 12, padding: "10px 12px", borderRadius: 8, minHeight: 64,
+            background: aligned ? `${COLORS.green}12` : COLORS.surfaceLight,
+            border: `1px solid ${aligned ? COLORS.green : COLORS.border}`,
+            fontSize: 13, lineHeight: 1.7, transition: "background 0.2s, border-color 0.2s",
+          }}>
+            {aligned ? (
+              <span style={{ color: COLORS.green }}>
+                ✧ <b>Resonance!</b> Av points along v itself — you found an eigenvector.
+                Stretch factor λ ≈ <b style={{ fontFamily: fonts.mono }}>{round(lambda, 2)}</b>
+                {lambda < 0 && " (negative: the matrix flips this direction end-for-end)"}.
+              </span>
+            ) : (
+              <span style={{ color: COLORS.muted }}>
+                The <span style={{ color: COLORS.gold }}>gold</span> arrow points somewhere new — this is not
+                a resonance direction. Keep sweeping…
+              </span>
+            )}
+          </div>
+
+          <button onClick={() => setReveal(!reveal)} style={{ ...btnStyle, marginTop: 10 }}>
+            {reveal ? "Hide" : "Reveal"} the eigen-axes
+          </button>
+          {reveal && (
+            <div style={{ fontSize: 12, color: COLORS.muted, marginTop: 8, lineHeight: 1.6 }}>
+              {eig.length === 0 && <>No dashed lines to draw: a pure rotation has <b>no</b> real eigenvectors. Every direction gets turned.</>}
+              {eig.length === 2 && eigAngle !== null && (
+                <>The dashed green lines are the two eigen-directions. Angle between them:{" "}
+                  <b style={{ color: COLORS.text, fontFamily: fonts.mono }}>{round(eigAngle, 1)}°</b>
+                  {Math.abs(eigAngle - 90) > 2 ? " — see, not perpendicular!" : " — perpendicular, because A is symmetric."}
+                </>
+              )}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// --- PageRank on a six-page mini-web -----------------------------------------
+const PR_PAGES = ["Cat GIFs", "Newt Facts", "Homework Help", "Espen's Blog", "Minecraft Tips", "Silly Jokes"];
+const PR_N = PR_PAGES.length;
+const PR_DAMP = 0.85;
+
+// links[i][j] = true means page i links to page j.
+const PR_INIT_LINKS = [
+  //           CatG  Newt  HW    Blog  Mine  Joke
+  /* CatG */ [false, false, false, true, false, false],
+  /* Newt */ [true, false, true, false, false, false],
+  /* HW   */ [true, true, false, false, false, false],
+  /* Blog */ [true, false, false, false, false, false],
+  /* Mine */ [true, false, false, false, false, true],
+  /* Joke */ [true, false, false, false, true, false],
+];
+
+function PageRankWidget() {
+  const prColors = [COLORS.gold, COLORS.green, COLORS.cyan, COLORS.magenta, COLORS.orange, COLORS.purple];
+  const [links, setLinks] = useState(PR_INIT_LINKS);
+  const [r, setR] = useState(new Array(PR_N).fill(1 / PR_N));
+  const [step, setStep] = useState(0);
+  const [autoRun, setAutoRun] = useState(false);
+  const autoRef = useRef(null);
+
+  // One power-method step: r ← r · P, where P has the 15% teleport baked in
+  // and dangling pages (no out-links) teleport with probability 1.
+  const surf = useCallback(() => {
+    setR(prev => {
+      const next = new Array(PR_N).fill(0);
+      for (let i = 0; i < PR_N; i++) {
+        const out = links[i].filter(Boolean).length;
+        for (let j = 0; j < PR_N; j++) {
+          const follow = out > 0 ? (links[i][j] ? 1 / out : 0) : 1 / PR_N;
+          next[j] += prev[i] * ((1 - PR_DAMP) / PR_N + PR_DAMP * follow);
+        }
+      }
+      return next;
+    });
+    setStep(s => s + 1);
+  }, [links]);
+
+  const reset = useCallback(() => {
+    setR(new Array(PR_N).fill(1 / PR_N));
+    setStep(0);
+    setAutoRun(false);
+  }, []);
+
+  useEffect(() => {
+    if (autoRun) autoRef.current = setInterval(surf, 400);
+    return () => clearInterval(autoRef.current);
+  }, [autoRun, surf]);
+
+  const toggleLink = (i, j) => {
+    const next = links.map(row => [...row]);
+    next[i][j] = !next[i][j];
+    setLinks(next);
+    reset();
+  };
+
+  // Hexagon layout
+  const cx0 = 200, cy0 = 205, RR = 140;
+  const positions = PR_PAGES.map((_, i) => {
+    const angle = (-Math.PI / 2) + (i * 2 * Math.PI) / PR_N;
+    return [cx0 + RR * Math.cos(angle), cy0 + RR * Math.sin(angle)];
+  });
+
+  const ranking = r.map((p, i) => ({ p, i })).sort((a, b) => b.p - a.p);
+  const settled = step >= 12;
+
+  return (
+    <div style={{
+      margin: "20px 0", padding: "18px 18px 20px",
+      background: COLORS.surface, border: `1px solid ${COLORS.border}`, borderRadius: 10,
+    }}>
+      <div style={{ fontSize: 12, color: COLORS.muted, marginBottom: 8, textTransform: "uppercase", letterSpacing: 1 }}>
+        Try it — rank a six-page web
+      </div>
+
+      <div style={{ display: "flex", gap: 16, flexWrap: "wrap" }}>
+        {/* LEFT: link editor + bars */}
+        <div style={{ flex: "1 1 300px", minWidth: 290 }}>
+          <div style={{ fontSize: 11, color: COLORS.muted, marginBottom: 6, textTransform: "uppercase", letterSpacing: 1 }}>
+            Who links to whom? (row links to column)
+          </div>
+          <div style={{ overflowX: "auto" }}>
+            <table style={{ borderCollapse: "collapse", fontFamily: fonts.mono, fontSize: 10 }}>
+              <thead>
+                <tr>
+                  <td style={{ padding: "3px 6px", fontSize: 9, color: COLORS.muted }}>from \ to</td>
+                  {PR_PAGES.map((l, j) => (
+                    <td key={j} style={{ padding: "3px 3px", color: prColors[j], textAlign: "center", fontSize: 9, fontWeight: 700 }}>
+                      {l.split(" ")[0]}
+                    </td>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {links.map((row, i) => (
+                  <tr key={i}>
+                    <td style={{ padding: "3px 6px", color: prColors[i], fontSize: 9, fontWeight: 700, whiteSpace: "nowrap" }}>{PR_PAGES[i]}</td>
+                    {row.map((on, j) => (
+                      <td key={j} style={{ padding: "2px 3px", textAlign: "center" }}>
+                        {i === j ? (
+                          <span style={{ color: COLORS.border }}>—</span>
+                        ) : (
+                          <button onClick={() => toggleLink(i, j)} aria-label={`${PR_PAGES[i]} links to ${PR_PAGES[j]}`}
+                            style={{
+                              width: 22, height: 22, padding: 0, borderRadius: 4, cursor: "pointer",
+                              background: on ? prColors[i] + "35" : COLORS.bg,
+                              border: `1px solid ${on ? prColors[i] : COLORS.border}`,
+                              color: on ? prColors[i] : COLORS.muted, fontSize: 11, lineHeight: 1,
+                            }}>
+                            {on ? "→" : "·"}
+                          </button>
+                        )}
+                      </td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Controls */}
+          <div style={{ display: "flex", gap: 6, marginTop: 12 }}>
+            <button onClick={surf} style={btnStyle}>Surf</button>
+            <button onClick={() => setAutoRun(!autoRun)}
+              style={{ ...btnStyle, background: autoRun ? COLORS.magenta + "30" : COLORS.surfaceLight, borderColor: autoRun ? COLORS.magenta : COLORS.border }}>
+              {autoRun ? "Stop" : "Auto"}
+            </button>
+            <button onClick={reset} style={btnStyle}>Reset</button>
+            <div style={{ alignSelf: "center", fontSize: 12, color: COLORS.muted }}>Click: {step}</div>
+          </div>
+
+          {/* Rank bars */}
+          <div style={{ marginTop: 12 }}>
+            <div style={{ fontSize: 11, color: COLORS.muted, marginBottom: 6, textTransform: "uppercase", letterSpacing: 1 }}>
+              Where is the surfer? (= PageRank as it settles)
+            </div>
+            {r.map((p, i) => (
+              <div key={i} style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 4 }}>
+                <span style={{ fontSize: 11, minWidth: 92, color: prColors[i] }}>{PR_PAGES[i]}</span>
+                <div style={{ flex: 1, height: 14, background: COLORS.bg, borderRadius: 3, overflow: "hidden" }}>
+                  <div style={{
+                    width: `${Math.min(100, p * 250)}%`, height: "100%", background: prColors[i],
+                    borderRadius: 3, transition: "width 0.3s",
+                  }} />
+                </div>
+                <span style={{ fontSize: 10, color: COLORS.text, fontFamily: fonts.mono, minWidth: 42, textAlign: "right" }}>
+                  {(p * 100).toFixed(1)}%
+                </span>
+              </div>
+            ))}
+          </div>
+
+          {settled && (
+            <div style={{
+              marginTop: 12, padding: "10px 12px", background: COLORS.green + "10",
+              border: `1px solid ${COLORS.green}40`, borderRadius: 6, fontSize: 12, lineHeight: 1.7,
+            }}>
+              <b style={{ color: COLORS.green }}>Settled.</b> This ranking no longer changes when the surfer
+              keeps clicking — it satisfies <span style={{ fontFamily: fonts.mono, color: COLORS.green }}>rP = r</span>.
+              An eigenvector, found by pure repetition. Search results:{" "}
+              {ranking.map((e, k) => (
+                <span key={e.i}>
+                  {k > 0 && <span style={{ color: COLORS.muted }}> › </span>}
+                  <b style={{ color: prColors[e.i] }}>{k + 1}. {PR_PAGES[e.i]}</b>
+                </span>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* RIGHT: the web graph */}
+        <div style={{ flex: "1 1 320px", minWidth: 300 }}>
+          <svg viewBox="0 0 400 410" style={{ width: "100%", maxWidth: 400, background: COLORS.bg, borderRadius: 8, border: `1px solid ${COLORS.border}` }}>
+            {links.map((row, i) => row.map((on, j) => {
+              if (!on || i === j) return null;
+              const [x1, y1] = positions[i];
+              const [x2, y2] = positions[j];
+              const dx = x2 - x1, dy = y2 - y1;
+              const len = Math.hypot(dx, dy);
+              const ux = dx / len, uy = dy / len;
+              const nx = -uy * 7, ny = ux * 7;
+              const rN = 30;
+              return (
+                <Arrow key={`${i}-${j}`}
+                  x1={x1 + ux * rN + nx} y1={y1 + uy * rN + ny}
+                  x2={x2 - ux * rN + nx} y2={y2 - uy * rN + ny}
+                  color={prColors[i]} strokeWidth={1.6} />
+              );
+            }))}
+            {positions.map(([cx, cy], i) => {
+              const rad = 16 + r[i] * 90;
+              return (
+                <g key={i}>
+                  <circle cx={cx} cy={cy} r={rad} fill={prColors[i] + "22"} stroke={prColors[i]}
+                    strokeWidth={2} style={{ transition: "r 0.3s" }} />
+                  <text x={cx} y={cy - 1} fill={COLORS.text} fontSize={10.5} textAnchor="middle" fontWeight={600}>
+                    {PR_PAGES[i]}
+                  </text>
+                  <text x={cx} y={cy + 12} fill={prColors[i]} fontSize={10} textAnchor="middle" fontFamily={fonts.mono}>
+                    {(r[i] * 100).toFixed(0)}%
+                  </text>
+                </g>
+              );
+            })}
+          </svg>
+          <div style={{ fontSize: 11, color: COLORS.muted, marginTop: 6, lineHeight: 1.6 }}>
+            Bubble size = current PageRank. Notice <b style={{ color: prColors[3] }}>Espen's Blog</b>:
+            exactly <i>one</i> page links to it — same as Newt Facts — yet it ends up with about ten times
+            Newt Facts' rank, because its one link comes from the biggest page on the web.
+            Quality of links beats quantity.
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function ChPageRank() {
+  return (
+    <div>
+      <Markdown src={CONTENT[8].intro} />
+      <EigenExplorer />
+      <Markdown src={CONTENT[8].middle} />
+      <PageRankWidget />
+      <Markdown src={CONTENT[8].outro} />
+    </div>
+  );
+}
+
+// ==================== CHAPTER 9: PCA & SVD ====================
+// Scatter any two Framingham variables (standardized), find the cloud's own
+// perpendicular axes (eigenvectors of the 2×2 covariance/correlation matrix),
+// and optionally rotate the cloud onto them — a live rotation matrix at work.
+function PCAWidget() {
+  const [xi, setXi] = useState(2);   // sysBP
+  const [yi, setYi] = useState(3);   // diaBP
+  const [rotated, setRotated] = useState(false);
+
+  const { zpts, rCorr, theta, lam1, lam2 } = useMemo(() => {
+    const xs = FRAM_DATA.map(d => d[xi]);
+    const ys = FRAM_DATA.map(d => d[yi]);
+    const n = xs.length;
+    const mean = a => a.reduce((s, v) => s + v, 0) / n;
+    const mx = mean(xs), my = mean(ys);
+    const sd = (a, m) => Math.sqrt(a.reduce((s, v) => s + (v - m) ** 2, 0) / (n - 1));
+    const sx = sd(xs, mx) || 1, sy = sd(ys, my) || 1;
+    const zpts = xs.map((v, k) => [(v - mx) / sx, (ys[k] - my) / sy, FRAM_DATA[k][7]]);
+    let cov = 0;
+    for (const [zx, zy] of zpts) cov += zx * zy;
+    cov /= n - 1;
+    // Standardized 2-var covariance matrix is [[1, r], [r, 1]].
+    const theta = 0.5 * Math.atan2(2 * cov, 0);        // direction of PC1
+    const lam1 = 1 + Math.abs(cov), lam2 = 1 - Math.abs(cov);
+    return { zpts, rCorr: cov, theta, lam1, lam2 };
+  }, [xi, yi]);
+
+  const ct = Math.cos(theta), st = Math.sin(theta);
+  // In rotated view, every point is multiplied by the rotation matrix R(−θ).
+  const view = ([zx, zy]) => rotated ? [ct * zx + st * zy, -st * zx + ct * zy] : [zx, zy];
+  const pc1 = rotated ? [1, 0] : [ct, st];
+  const pc2 = rotated ? [0, 1] : [-st, ct];
+  const pct1 = (lam1 / (lam1 + lam2)) * 100;
+
+  const selStyle = {
+    background: COLORS.surfaceLight, color: COLORS.text, border: `1px solid ${COLORS.border}`,
+    borderRadius: 6, padding: "6px 8px", fontFamily: "inherit", fontSize: 13,
+  };
+
+  return (
+    <div style={{
+      margin: "20px 0", padding: "18px 18px 20px",
+      background: COLORS.surface, border: `1px solid ${COLORS.border}`, borderRadius: 10,
+    }}>
+      <div style={{ fontSize: 12, color: COLORS.muted, marginBottom: 8, textTransform: "uppercase", letterSpacing: 1 }}>
+        Try it — 300 real people, any two measurements
+      </div>
+
+      {/* Variable pickers */}
+      <div style={{ display: "flex", gap: 10, flexWrap: "wrap", alignItems: "center", marginBottom: 12 }}>
+        <label style={{ fontSize: 12, color: COLORS.muted, display: "flex", alignItems: "center", gap: 6 }}>
+          across:
+          <select value={xi} onChange={e => setXi(+e.target.value)} style={selStyle}>
+            {FRAM_VARS.map((v, i) => <option key={v} value={i} disabled={i === yi}>{FRAM_LABELS[v]}</option>)}
+          </select>
+        </label>
+        <label style={{ fontSize: 12, color: COLORS.muted, display: "flex", alignItems: "center", gap: 6 }}>
+          up:
+          <select value={yi} onChange={e => setYi(+e.target.value)} style={selStyle}>
+            {FRAM_VARS.map((v, i) => <option key={v} value={i} disabled={i === xi}>{FRAM_LABELS[v]}</option>)}
+          </select>
+        </label>
+        <label style={{ fontSize: 12, color: COLORS.text, display: "flex", alignItems: "center", gap: 6, cursor: "pointer", marginLeft: "auto" }}>
+          <input type="checkbox" checked={rotated} onChange={e => setRotated(e.target.checked)} />
+          rotate cloud onto its own axes
+        </label>
+      </div>
+
+      <div style={{ display: "flex", gap: 16, flexWrap: "wrap" }}>
+        <div style={{ flex: "1 1 300px", minWidth: 280 }}>
+          <SVGCanvas width={380} height={380} xRange={[-3.6, 3.6]} yRange={[-3.6, 3.6]}>
+            {(w, h, xR, yR) => {
+              const O = m2s(0, 0, w, h, xR, yR);
+              const a1 = m2s(pc1[0] * 2 * Math.sqrt(lam1), pc1[1] * 2 * Math.sqrt(lam1), w, h, xR, yR);
+              const a2 = m2s(pc2[0] * 2 * Math.sqrt(lam2), pc2[1] * 2 * Math.sqrt(lam2), w, h, xR, yR);
+              return (
+                <g>
+                  {zpts.map((p, k) => {
+                    const [vx, vy] = view(p);
+                    const [sx, sy] = m2s(vx, vy, w, h, xR, yR);
+                    return <circle key={k} cx={sx} cy={sy} r={2.6}
+                      fill={p[2] ? COLORS.magenta : COLORS.cyan} opacity={p[2] ? 0.8 : 0.45}
+                      style={{ transition: "cx 0.4s, cy 0.4s" }} />;
+                  })}
+                  <Arrow x1={O[0]} y1={O[1]} x2={a1[0]} y2={a1[1]} color={COLORS.gold} strokeWidth={3} />
+                  <Arrow x1={O[0]} y1={O[1]} x2={a2[0]} y2={a2[1]} color={COLORS.purple} strokeWidth={2.5} />
+                  <text x={a1[0] + 6} y={a1[1] - 6} fill={COLORS.gold} fontSize={12} fontFamily={fonts.mono} fontWeight={700}>PC1</text>
+                  <text x={a2[0] + 6} y={a2[1] - 6} fill={COLORS.purple} fontSize={12} fontFamily={fonts.mono} fontWeight={700}>PC2</text>
+                </g>
+              );
+            }}
+          </SVGCanvas>
+          <div style={{ fontSize: 11, color: COLORS.muted, marginTop: 6 }}>
+            Each dot is a person (standardized units).{" "}
+            <span style={{ color: COLORS.magenta }}>●</span> = developed heart disease within 10 years,{" "}
+            <span style={{ color: COLORS.cyan }}>●</span> = didn't.
+          </div>
+        </div>
+
+        <div style={{ flex: "1 1 260px", minWidth: 250 }}>
+          {/* The little covariance matrix being diagonalized */}
+          <div style={{ fontSize: 11, color: COLORS.muted, marginBottom: 6, textTransform: "uppercase", letterSpacing: 1 }}>
+            Covariance matrix (standardized)
+          </div>
+          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+            <div className="matrix" style={{ "--mx-cell": "44px", "--mx-color": COLORS.orange }}>
+              <span className="mx-bracket left" />
+              <span className="mx-bracket right" />
+              <div className="mx-grid" style={{ gridTemplateColumns: "repeat(2, var(--mx-cell))" }}>
+                {[1, rCorr, rCorr, 1].map((v, i) => {
+                  const s = typeof v === "number" && v !== 1 ? round(v, 2).toFixed(2) : "1";
+                  return <div key={i} className="mx-cell" data-len={s.length}
+                    style={{ color: i === 1 || i === 2 ? COLORS.orange : COLORS.text }}>{s}</div>;
+                })}
+              </div>
+            </div>
+            <div style={{ fontSize: 12, color: COLORS.muted, lineHeight: 1.6 }}>
+              The <span style={{ color: COLORS.orange }}>orange</span> number is the correlation
+              r — how much these two measurements move together. Symmetric, always.
+            </div>
+          </div>
+
+          {/* Variance explained */}
+          <div style={{ fontSize: 11, color: COLORS.muted, margin: "14px 0 6px", textTransform: "uppercase", letterSpacing: 1 }}>
+            Spread captured by each axis
+          </div>
+          {[{ name: "PC1", lam: lam1, color: COLORS.gold }, { name: "PC2", lam: lam2, color: COLORS.purple }].map(({ name, lam, color }) => {
+            const pct = (lam / (lam1 + lam2)) * 100;
+            return (
+              <div key={name} style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 4 }}>
+                <span style={{ fontSize: 11, minWidth: 30, color, fontFamily: fonts.mono, fontWeight: 700 }}>{name}</span>
+                <div style={{ flex: 1, height: 14, background: COLORS.bg, borderRadius: 3, overflow: "hidden" }}>
+                  <div style={{ width: `${pct}%`, height: "100%", background: color, borderRadius: 3, transition: "width 0.3s" }} />
+                </div>
+                <span style={{ fontSize: 10, color: COLORS.text, fontFamily: fonts.mono, minWidth: 40, textAlign: "right" }}>
+                  {pct.toFixed(0)}%
+                </span>
+              </div>
+            );
+          })}
+
+          <div style={{
+            marginTop: 12, padding: "10px 12px", borderRadius: 8,
+            background: COLORS.surfaceLight, border: `1px solid ${COLORS.border}`,
+            fontSize: 12, lineHeight: 1.7, color: COLORS.text,
+          }}>
+            {rotated ? (
+              <>Rotated! Every dot was multiplied by the rotation matrix{" "}
+                <span style={{ fontFamily: fonts.mono, color: COLORS.gold }}>R(−{round(theta * 180 / Math.PI, 0)}°)</span>{" "}
+                from Chapter 4. Now PC1 <i>is</i> the horizontal axis. If you kept only each dot's
+                horizontal coordinate, you'd keep {pct1.toFixed(0)}% of the story with half the numbers —
+                that's dimensionality reduction.</>
+            ) : (
+              <>The gold arrow hugs the cloud's long direction; purple is exactly perpendicular.
+                Strongly correlated pairs (try the two blood pressures) make a thin cigar —
+                PC1 captures almost everything. Weakly related pairs (try age vs heart rate) make a
+                round blob — no axis is special, and there's nothing to compress.</>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function ChPCA() {
+  return (
+    <div>
+      <Markdown src={CONTENT[9].intro} />
+      <PCAWidget />
+      <Markdown src={CONTENT[9].outro} />
+    </div>
+  );
+}
+
+// ==================== CHAPTER 10: NEURAL NETWORKS ====================
 // Live tiny neural network: classifies a concentric-rings dataset. Demonstrates
 // Olah's topology argument — 2 hidden units topologically can't separate the
 // rings; 3 hidden units lifts the inner ring out of the plane so a flat hyperplane
@@ -3102,7 +3762,7 @@ function makeRingsData(seed = 7) {
   return data;
 }
 
-function Ch8() {
+function ChNeural() {
   const [hiddenSize, setHiddenSize] = useState(3);
   const [epoch, setEpoch] = useState(0);
   const [running, setRunning] = useState(false);
@@ -3191,7 +3851,7 @@ function Ch8() {
 
   return (
     <div>
-      <Markdown src={CONTENT[8].intro} />
+      <Markdown src={CONTENT[10].intro} />
 
       {/* Controls */}
       <div style={{
@@ -3290,7 +3950,7 @@ function Ch8() {
         </div>
       </div>
 
-      <Markdown src={CONTENT[8].outro} />
+      <Markdown src={CONTENT[10].outro} />
     </div>
   );
 }
@@ -3610,8 +4270,106 @@ function WeightMatrices({ net }) {
   );
 }
 
-// ==================== CHAPTER 9: SUMMARY ====================
-function Ch9() {
+// ==================== CHAPTER 11: SUMMARY ====================
+
+// The Spellbook: the handful of input→output spells that make up basic linear
+// algebra. Two per chapter, tops — the point is that there really are only a few.
+const SPELLS = [
+  {
+    ch: "Linear Systems", color: COLORS.gold, spells: [
+      { name: "sizeCheck()", sig: "(R×N)(N×C) → an R×C answer, or nothing at all", what: "Middle numbers must match; outer numbers shape the answer. Cast silently before every multiplication, forever." },
+      { name: "solve()", sig: "matrix A, vector b → the x with Ax = b", what: "Finds where all your true statements agree — two lines crossing, without drawing them." },
+    ],
+  },
+  {
+    ch: "Transformations", color: COLORS.cyan, spells: [
+      { name: "transform()", sig: "matrix A, point v → the moved point Av", what: "Moves every point in space at once. The columns of A are simply where x̂ and ŷ land." },
+      { name: "compose()", sig: "matrix A, matrix B → one matrix AB", what: "Two transformations fused into one. Order matters: AB means \"do B, then A.\"" },
+    ],
+  },
+  {
+    ch: "Dot Product", color: COLORS.green, spells: [
+      { name: "dot()", sig: "vector a, vector b → one number", what: "How much two arrows agree. Zero means perpendicular — the most useful zero in mathematics." },
+      { name: "shadow()", sig: "vector a, vector b → the part of a along b", what: "Projection: a's shadow on b's line, built from two dots and a divide." },
+    ],
+  },
+  {
+    ch: "Rotations", color: COLORS.orange, spells: [
+      { name: "rotate()", sig: "angle θ → matrix [[cos θ, −sin θ], [sin θ, cos θ]]", what: "Spins the whole plane while changing no lengths and no angles. cos and sin are just where x̂ ends up." },
+    ],
+  },
+  {
+    ch: "Determinants", color: COLORS.magenta, spells: [
+      { name: "det()", sig: "matrix A → one number (ad − bc)", what: "The area-stretch factor. Zero means A squashes space flat — and flat can't be undone." },
+      { name: "invert()", sig: "matrix A → matrix A⁻¹ (needs det ≠ 0)", what: "The undo spell: A⁻¹(Av) = v. It's why x = A⁻¹b solves the whole system in one move." },
+    ],
+  },
+  {
+    ch: "Homogeneous Coordinates", color: COLORS.purple, spells: [
+      { name: "lift()", sig: "point (x, y) → point (x, y, 1)", what: "One sneaky extra dimension, and suddenly sliding sideways is a matrix multiply like everything else. Every video game casts this." },
+    ],
+  },
+  {
+    ch: "Markov Chains", color: COLORS.cyan, spells: [
+      { name: "hop()", sig: "probabilities p, transition matrix P → tomorrow's pP", what: "One matrix multiply = one tick of the clock, for a whole world of maybes." },
+      { name: "settle()", sig: "transition matrix P → the π with πP = π", what: "Hop forever and the odds stop changing. A world's long-run habits, as a single vector." },
+    ],
+  },
+  {
+    ch: "PageRank", color: COLORS.purple, spells: [
+      { name: "eigen()", sig: "matrix A → the directions v with Av = λv", what: "A matrix's own axes: the directions it stretches but never turns. Not usually perpendicular!" },
+      { name: "pagerank()", sig: "who-links-to-whom matrix → every page's importance", what: "settle(), cast on the entire internet. Built Google." },
+    ],
+  },
+  {
+    ch: "PCA", color: COLORS.orange, spells: [
+      { name: "svd()", sig: "any matrix → (rotation)(stretch)(rotation)", what: "Every matrix unmasked: turn, stretch along perpendicular axes, turn. No exceptions." },
+      { name: "pca()", sig: "cloud of data → its own axes, longest first", what: "Finds what seven measurements were really saying with two. Keep the long axes; shrug off the thin." },
+    ],
+  },
+  {
+    ch: "Neural Networks", color: COLORS.green, spells: [
+      { name: "layer()", sig: "vector x → σ(Wx + b)", what: "Multiply, slide, squish. Stack a few and space bends until hard problems become easy ones." },
+      { name: "train()", sig: "wrong matrix + examples → slightly-less-wrong matrix", what: "Repeat a few million times. That, honestly, is modern AI." },
+    ],
+  },
+];
+
+function Spellbook() {
+  return (
+    <div style={{ margin: "18px 0 26px" }}>
+      <div style={{
+        fontSize: 11, color: COLORS.gold, textTransform: "uppercase", letterSpacing: 2.5,
+        fontFamily: fonts.mono, fontWeight: 700, marginBottom: 8,
+      }}>✦ The Spellbook</div>
+      <Prose>
+        Here's a secret about linear algebra: it's <b>small</b>. People study it for years, but the
+        working core is a handful of spells — and you now own all of them. Each one is an
+        input → output machine: you feed it matrices or vectors, it hands something back, every time,
+        no exceptions. Everything else in this course was just learning what the spells <i>mean</i>.
+      </Prose>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(290px, 1fr))", gap: 10, marginTop: 12 }}>
+        {SPELLS.flatMap(group => group.spells.map(spell => (
+          <div key={spell.name} style={{
+            padding: "12px 14px", borderRadius: 8,
+            background: COLORS.surface, border: `1px solid ${group.color}35`,
+            borderTop: `2px solid ${group.color}`,
+          }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 8 }}>
+              <span style={{ fontFamily: fonts.mono, fontWeight: 700, fontSize: 14, color: group.color }}>{spell.name}</span>
+              <span style={{ fontSize: 9, color: COLORS.muted, textTransform: "uppercase", letterSpacing: 1, whiteSpace: "nowrap" }}>{group.ch}</span>
+            </div>
+            <div style={{ fontFamily: fonts.mono, fontSize: 11.5, color: COLORS.text, margin: "7px 0 6px", lineHeight: 1.55 }}>
+              {spell.sig}
+            </div>
+            <div style={{ fontSize: 12, color: COLORS.muted, lineHeight: 1.6 }}>{spell.what}</div>
+          </div>
+        )))}
+      </div>
+    </div>
+  );
+}
+function ChSummary() {
   const sections = [
     {
       title: "Algebra ↔ Geometry",
@@ -3674,14 +4432,44 @@ function Ch9() {
         "A transition matrix encodes probabilistic state-to-state hops (rows sum to 1).",
         "Matrix × probability vector = one step of time.",
         "The steady state is a vector the matrix doesn't change — your first eigenvector.",
-        "This is the math behind Google PageRank and much of modern machine learning.",
+      ],
+    },
+    {
+      title: "PageRank & Eigenvectors",
+      color: COLORS.purple,
+      items: [
+        "An eigenvector is a direction the matrix doesn't turn, only stretches: Av = λv. Eigenvectors are a matrix's natural axes — its directions of resonance.",
+        "Applying a matrix over and over amplifies the strongest eigenvector until it dominates (the power method). That's why Markov chains settle.",
+        "PageRank = the steady-state eigenvector of the web's link matrix. Google's original ranking was one eigenvector calculation, plus a 15% teleport hack.",
+        "Eigenvectors are generally NOT perpendicular to each other.",
+      ],
+    },
+    {
+      title: "PCA & the SVD",
+      color: COLORS.orange,
+      items: [
+        "Every matrix — no exceptions — is (rotation) × (stretch along perpendicular axes) × (rotation). That's the Singular Value Decomposition.",
+        "PCA aims those perpendicular axes at a data cloud: PC1 runs down the cloud's longest direction, PC2 perpendicular to it, ranked by variance captured.",
+        "Symmetric matrices (like covariance matrices) are the polite ones whose eigen-axes ARE perpendicular — that's why PCA's axes are orthogonal when PageRank's weren't.",
+        "Keeping only the long axes compresses many measurements into few: dimensionality reduction, on real Framingham heart-study data.",
+      ],
+    },
+    {
+      title: "Neural Networks",
+      color: COLORS.green,
+      items: [
+        "A layer is σ(Wx + b): matrix multiply, slide, tiny non-linear squish. A network is a stack of layers.",
+        "Networks classify by warping space until the classes become separable by a flat plane.",
+        "Topology sets real limits: separating a blob from a surrounding ring needs at least 3 hidden units.",
       ],
     },
   ];
 
   return (
     <div>
-      <Markdown src={CONTENT[9].intro} />
+      <Markdown src={CONTENT[11].intro} />
+
+      <Spellbook />
 
       <div style={{ margin: "20px 0" }}>
         {sections.map((s, i) => (
@@ -3713,7 +4501,7 @@ function Ch9() {
         ))}
       </div>
 
-      <Markdown src={CONTENT[9].outro} />
+      <Markdown src={CONTENT[11].outro} />
     </div>
   );
 }
@@ -3728,9 +4516,14 @@ const chapterData = [
   { num: 5, title: "Determinants",           component: Ch5, color: COLORS.magenta },
   { num: 6, title: "Homogeneous Coordinates", component: Ch6, color: COLORS.purple },
   { num: 7, title: "Markov Chains",          component: Ch7, color: COLORS.cyan },
-  { num: 8, title: "Neural Networks",        component: Ch8, color: COLORS.green },
-  { num: 9, title: "Summary",                component: Ch9, color: COLORS.gold },
+  { num: 8, title: "PageRank",               component: ChPageRank, color: COLORS.purple },
+  { num: 9, title: "PCA",                    component: ChPCA, color: COLORS.orange },
+  { num: 10, title: "Neural Networks",       component: ChNeural, color: COLORS.green },
+  { num: 11, title: "Summary",               component: ChSummary, color: COLORS.gold },
 ];
+
+// Exported for smoke tests (scripts can render every chapter without the app shell).
+export { chapterData };
 
 // ==================== MAIN APP ====================
 export default function MatrixExplorer() {
@@ -3768,7 +4561,7 @@ export default function MatrixExplorer() {
           {chapterData.map((c, i) => (
             <button key={i} className={i === chapter ? "active" : ""} onClick={() => setChapter(i)}
               style={{ borderBottom: `3px solid ${i === chapter ? "#33C3F0" : "transparent"}` }}>
-              {c.num}. {c.title}
+              {c.title}
             </button>
           ))}
         </div>
@@ -3796,7 +4589,7 @@ export default function MatrixExplorer() {
             fontSize: 11, color: ch.color, fontFamily: fonts.mono,
             textTransform: "uppercase", letterSpacing: 2,
           }}>
-            Chapter {ch.num}
+            Chapter
           </span>
           <h2 style={{ fontSize: 20, fontWeight: 700, color: COLORS.text, marginTop: 4 }}>
             {ch.title}

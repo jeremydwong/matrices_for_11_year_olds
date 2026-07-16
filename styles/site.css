@@ -121,6 +121,90 @@ a:hover { color: var(--link-hover); }
 ::selection { background: rgba(51, 195, 240, 0.30); }
 
 /* ---------------------------------------------------------------------------
+ * Matrix sizing — solved once, importable into other projects.
+ *
+ * One variable, --mx-cell, drives everything: cell size, digit font size,
+ * bracket-arm length, grid gap, and operator signs (×, =, →). Change the cell
+ * size and the whole matrix rescales in proportion. The default is fluid
+ * (clamp) so matrices shrink gracefully on narrow screens.
+ *
+ * Usage:
+ *   <div class="matrix" style="--mx-color: <bracket color>">
+ *     <span class="mx-bracket left"/><span class="mx-bracket right"/>
+ *     <div class="mx-grid" style="grid-template-columns: repeat(C, var(--mx-cell))">
+ *       <div class="mx-cell" data-len={String(v).length}>{v}</div>  (or <input class="mx-cell">)
+ *     </div>
+ *   </div>
+ *   ...between matrices: <span class="mx-sign">×</span>
+ *
+ * data-len is the number of characters in the entry; the font auto-steps down
+ * so "-162" fits the same cell that "7" does. Colors/backgrounds stay in JS.
+ * ------------------------------------------------------------------------- */
+.matrix,
+.mx-row { --mx-cell: clamp(34px, 9vw, 46px); }
+
+.matrix {
+  position: relative;
+  display: inline-block;
+  padding: calc(var(--mx-cell) * 0.09) calc(var(--mx-cell) * 0.22);
+  --mx-color: currentColor;
+}
+.mx-row {                       /* a whole equation: matrices + signs, wraps on small screens */
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: calc(var(--mx-cell) * 0.09);
+}
+.matrix .mx-grid {
+  display: grid;
+  gap: calc(var(--mx-cell) * 0.12);
+}
+.matrix .mx-bracket {
+  position: absolute;
+  top: calc(var(--mx-cell) * 0.04);
+  bottom: calc(var(--mx-cell) * 0.04);
+  width: calc(var(--mx-cell) * 0.15);   /* the bracket "arm" length */
+  border: 0 solid var(--mx-color);
+  border-top-width: 2px;
+  border-bottom-width: 2px;
+  pointer-events: none;
+}
+.matrix .mx-bracket.left  { left: 0;  border-left-width: 2px; }
+.matrix .mx-bracket.right { right: 0; border-right-width: 2px; }
+
+.mx-cell {
+  width: var(--mx-cell);
+  height: var(--mx-cell);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  font-family: 'IBM Plex Mono', monospace;
+  font-weight: 700;
+  font-size: calc(var(--mx-cell) * 0.40);  /* 1-2 characters */
+  line-height: 1;
+}
+/* Digit-count font steps: longer entries shrink to fit the same cell. */
+.mx-cell[data-len="3"] { font-size: calc(var(--mx-cell) * 0.33); }
+.mx-cell[data-len="4"] { font-size: calc(var(--mx-cell) * 0.27); }
+.mx-cell[data-len="5"] { font-size: calc(var(--mx-cell) * 0.23); }
+.mx-cell[data-len="6"] { font-size: calc(var(--mx-cell) * 0.20); }
+
+/* Inputs used as cells: kill the number-spinner so digits get the full width. */
+input.mx-cell { padding: 0; appearance: textfield; -moz-appearance: textfield; }
+input.mx-cell::-webkit-outer-spin-button,
+input.mx-cell::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+
+/* Operator signs (×, =, →) between matrices scale with the cells too. */
+.mx-sign {
+  font-size: calc(var(--mx-cell, 46px) * 0.52);
+  font-weight: 700;
+  line-height: 1;
+  padding: 0 calc(var(--mx-cell, 46px) * 0.09);
+}
+
+/* ---------------------------------------------------------------------------
  * The light/dark toggle switch — a scoped copy of the switch in custom.css
  * (`label`, `label:after`, `input:checked + label:after`, `.toggle-container`).
  * It lives in the navbar, which is OUTSIDE the light-mode filter below, so its
