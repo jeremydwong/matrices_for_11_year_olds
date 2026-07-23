@@ -1,11 +1,11 @@
 # intro
 
-You made it all the way through. Let's zoom out and look at the whole map — starting with the spellbook: the short list of input → output machines you now know how to cast. Below the spells, the summary cards revisit each chapter, and at the bottom there's a "Big Picture" reflection and pointers on where to go next.
+You made it all the way through, and thank you for your patience =). Let's zoom out and look at the whole map — starting with the spellbook: the short list of input → output machines you now know how to cast. Below the spells, the summary cards revisit each chapter, and at the bottom there's a "Big Picture" reflection and pointers on where to go next.
 
 # outro
 
 :::callout color=gold
-**The Big Picture.** Everything here was one story. Linear equations became matrices. Matrices became transformations of space. Dot products gave us perpendicularity, lengths, and projections — and those were exactly the tools needed to discover sin and cos hiding inside rotation matrices. Determinants tied it all back to systems of equations. Homogeneous coordinates let us compose transformations. Markov chains showed that a matrix can encode not just geometry but *probability*, with a steady state that quietly introduced eigenvectors. PageRank turned that one eigenvector into a search engine for the entire internet. PCA revealed the deepest structural fact of all — every matrix is just turn, stretch, turn — and used it to find the hidden axes of real medical data. And neural networks revealed that all of modern AI is just stacks of these same matrix transformations, with a tiny non-linear squish in between, tuned to warp space until problems become solvable.
+**The Big Picture.** Everything here was meant to be a digestable story. Linear equations became matrices. Matrices became transformations of space. Dot products gave us perpendicularity, lengths, and projections — and those were exactly the tools needed to discover sin and cos hiding inside rotation matrices. Determinants tied it all back to systems of equations. Homogeneous coordinates let us compose transformations. Markov chains showed that a matrix can encode not just geometry but *probability*, with a steady state that quietly introduced eigenvectors. PageRank turned that one eigenvector into a search engine for the entire internet. PCA revealed the deepest structural fact of all — every matrix is just turn, stretch, turn — and used it to find the hidden axes of real medical data. And neural networks revealed that all of modern AI is just stacks of these same matrix transformations, with a tiny non-linear squish in between, tuned to warp space until problems become solvable.
 :::end
 
 ## Where to go next

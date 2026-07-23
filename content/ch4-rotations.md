@@ -1,6 +1,6 @@
 # intro
 
-Now for the big reveal: **what matrix rotates things without stretching them?** From Chapter 3, you learned that perpendicular means "dot product = zero" and that lengths come from dot products too. A rotation must preserve both. There's exactly one family of matrices that does this — and it forces the functions cos and sin to appear.
+Rotations are super cool, and matrices can represent them: **what matrix rotates things without stretching them?** From Chapter 3, you learned that perpendicular means "dot product = zero" and that lengths come from dot products too. A rotation must preserve both. There's exactly one family of matrices that does this — and it forces the functions cos and sin to appear.
 
 This chapter has three parts. **Part A** introduces the rotation matrix R(θ) and shows how it acts on shapes in the plane. **Part B** derives that matrix from scratch by writing the new basis vectors in old-frame coordinates — using the same recipe from Chapter 2. **Part C** steps up to 3D, rotating around the z-axis, where the structure of the matrix becomes even clearer.
 
@@ -16,4 +16,7 @@ This chapter has three parts. **Part A** introduces the rotation matrix R(θ) an
 - Rotating by 0 or 2π gives the identity matrix — you end up exactly where you started.
 - Rotating by π/2 (90°) swaps coordinates and flips a sign. Try it!
 - Rotating by angle α, then by β, is the same as rotating by (α + β). This is where the angle-addition formulas come from.
+
+Aside:
+My brain has problems. I love that by writing the basis vectors in one coordinate system as the column vectors for a matrix GIVES you the way of writing a rotation matrix, but I *get confused* by the order. One way I like to think of it is that to create a matrix M_AB, that rotates coordinate system B into A, what you must do is write the basis vectors of B in terms of A, as columns. Logical, because the matrix M_AB produces vectors in terms of system A, so of course ALL vectors are written in terms of its basis vectors.
 :::end

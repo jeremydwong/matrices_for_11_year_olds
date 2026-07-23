@@ -1,8 +1,8 @@
 # intro
 
-Here's a problem: matrix multiplication can rotate and scale things, but it can't **slide** (translate) them — because multiplying by a matrix always keeps the origin fixed.
+Here's a problem: matrix multiplication can rotate and scale things, but it can't **slide** (translate) them — because multiplying by a matrix always keeps the origin fixed. We'd have to do AB + offset, which isn't that handy. 
 
-The clever trick: add a fake extra dimension! Instead of a 2D point [x, y], write it as [x, y, **1**]. Now a **3×3 matrix** can encode translation in its last column. All three operations — scale, rotate, translate — become one single matrix multiply.
+There is a clever trick: add an extra dimension! Instead of a 2D point [x, y], write it as [x, y, **1**]. Now a **3×3 matrix** can encode translation in its last column. All three operations — scale, rotate, translate — become one single matrix multiply.
 
 :::definition
 An **affine transformation** of the plane is a function of the form **T(v) = Mv + t**, where **M** is a 2×2 matrix (the linear part) and **t** is a 2D translation vector. Equivalently, in homogeneous coordinates, **T** is the action of a 3×3 matrix whose top-left 2×2 block is **M**, whose top-right 2×1 block is **t**, and whose bottom row is [0, 0, 1].

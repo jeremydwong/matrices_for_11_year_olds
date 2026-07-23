@@ -1,8 +1,10 @@
 # intro
 
-You already know how to solve two equations at the same time — like finding where two lines cross. But what if I told you there's a **machine** that eats equations and spits out answers? Using a **matrix** representation of this problem, we can generally solve this kind of problem.
+You already know how to solve two equations at the same time — like finding where two lines cross. But what if I told you (#thematrix; which you have not seen yet!) there's a **machine** that eats equations and spits out answers? Using a **matrix** representation of this problem, we can generally solve this kind of problem without even thinking about it.
 
 You might imagine that this is a bit of a toy problem, but this sort of thing happens all the time! You can thing of each row as being a true statement about the relationship between these two variables. It could be, for example, that x is really a variable representing time (where 0 is perhaps right now!), and y represents the amount of apples produced by my uncle Pete per day, and consumed by my uncle Doug per day (a bit of a contrived example perhaps! Hopefully Doug doesn't actually eat strictly as a function of time). Finding the intersection of these two true statements tells us when the amount of apples eaten, and consumed, per day are the same. 
+
+You might imagine (more interestingly?) that we need to do the same sorts of estimates for the whole world -- all of humans will eventually want to eat like us lucky North Americans, for which we'd need yields (food per acre) to rise by more than 2x; and the same might be said for energy production vs energy consumption.
 
 Try changing the numbers below. You're writing two equations, and the matrix on the right is the same information — just organized differently.
 
@@ -15,10 +17,10 @@ Critically, try a few important ones to find a few interesting ones!
 
 ## How matrix multiplication works
 
-So how does the matrix "contain" those two equations? There's a rule — **matrix multiplication** — and it's worth memorizing because it's the same rule every time, forever. It's weird, sort of. But you only have to learn it once, and trust me it's easy and sort of satisfying.
+So how does the matrix "contain" those two equations? There's a rule — **matrix multiplication** — and it's worth memorizing because it's the same rule every time, forever. It's weird, sort of (I almost don't want to say why it's weird, so that maybe you don't notice). But you only have to learn it once, and trust me it's easy and sort of satisfying.
 
 :::definition
-To multiply a matrix by another matrix (or vector): take one **row** of the matrix, go across it left to right, and multiply each entry by the matching entry going **down** a column vector (or in our case with the xs and ys, just the vector itself. A Vector is just like an Nx1 matrix, really, where N is the number of rows). Add those products together. That gives you one number in the result. Repeat for every row.
+To multiply a matrix by another matrix (or vector): take one **row** of the FIRST matrix, go across it left to right, and multiply each entry by the matching entry going **down** a column vector (or in our case with the xs and ys, just the vector itself. A Vector is just like an Nx1 matrix, really, where N is the number of rows). Add those products together. That gives you one number in the result. Repeat for every row.
 :::playful
 Across the row, down the column, multiply and add. Each row produces one number in the answer.
 :::end
@@ -34,9 +36,9 @@ So matrix multiplication is the bridge between the compact grid and the pair of 
 This "across-and-down" rule also works for multiplying two full matrices together (not just a matrix times a vector). Each row of the left matrix gets paired with each column of the right matrix. We'll see that later — for now, one column (a vector) is enough.
 :::end
 
-## The size check — something genuinely new is happening
+## The size check — Two new thingys
 
-Stop and notice something. Up to now, every multiplication in your life has been between things of the **same kind**: a number times a number. Matrices are the first time you're multiplying two objects that can have **different sizes** — a 2×2 grid times a 2×1 column, say. That's a real upgrade, and it comes with one new responsibility: not every pair of matrices *can* be multiplied. So whenever you read two matrices standing next to each other, do the quick ritual that every mathematician, physicist, and game programmer does silently, every time:
+Stop and notice that, before now, every multiplication in your life has been between things of the **same size**: one number times another number. Matrices are the first time you're multiplying two objects that can have **different sizes** — a 2×2 grid times a 2×1 column, say. That's a genuine upgrade--some math folks use the term 'overloading', where, in this case, we've now loaded the idea of multiplying to encompass a similar but more general notion. It comes with one new responsibility: not every pair of matrices *can* be multiplied. So whenever you read two matrices standing next to each other, do the quick ritual that every mathematician, physicist, and game programmer does silently, every time:
 
 1. Write the two shapes side by side: {{(2×2)(2×1)}}.
 2. Look at the two numbers in the **middle**. They must **match**. (That's the row going *across* meeting the column going *down* — they have to be the same length, or the pairs don't pair up.)
@@ -44,6 +46,14 @@ Stop and notice something. Up to now, every multiplication in your life has been
 
 :::callout color=cyan
 **Middle numbers must match. Outer numbers are the shape of the answer.** If the middle numbers don't match, the multiplication simply doesn't exist — this isn't a rule someone invented to annoy you, it's the across-and-down rule protecting itself. Try to break it below.
+:::end
+
+The second new thing: It might not be apparent yet, but matrices are also the first time you're seeing multiplication order mattering. Of course, you already know your order of operations, so you know about order mattering for doing math. But here, multiplication also loses its order-indifferent nature to operations: AxB in general does not equal BxA, and sometimes of course despite being able to compute AxB you might not even be albe to do BxA if the sizes don't work.
+
+Aside: I hated this when I was learning about matrices. It seemed like a violation of my old trustworthy friend, multiplication, which had an intuition: the area of a field defined by height A and B is always the same, no matter whether you do AxB or BxA. But what i didn't understand is this
+
+:::callout color=cyan
+**Matrix order also reflects true intuitions, just about more complicated things.** There are a number of examples that we could get into, but one think you could convince yourself with is rotations of 3D things. Try your Rubix cube: if you do a few different rotations, and then start over again with those rotations shuffled up, you'll see that order matters. So: be better than I was when I learned about matrices; don't be too offended that now, for matrices, order matters. It reflects how real things work.
 :::end
 
 # outro

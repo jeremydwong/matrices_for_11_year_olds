@@ -1,6 +1,6 @@
 # intro
 
-Time to see matrices represent **chance** instead of geometry. Picture a person wandering through a movie complex with five places: **Lobby**, **ATM**, **Arcade**, **Washroom**, **Theatre**. Each minute they might stay where they are or move to another area, based on some reasonable habits:
+Time to see matrices represent **chance** instead of geometry. I do not know why I use this Markov process example, but I once barely passed a CS assignment simulating moving through a movie theatre, teaching us how to use queues as Data Structures. Anyway. Picture this: a person wandering through a movie complex with five places: **Lobby**, **ATM**, **Arcade**, **Washroom**, **Theatre**. Each minute they might stay where they are or move to another area, based on some reasonable habits:
 
 - **ATM → Arcade**: if they just got cash, odds are high they head to the arcade.
 - **Arcade → ATM**: games eat coins, so they often loop back for more.

@@ -14,9 +14,9 @@ Multiply diagonals, subtract. The answer tells you two things at once: how much 
 :::major
 - For a 2×2 matrix [[a, b], [c, d]], the determinant is **det = ad − bc**.
 - The absolute value of the determinant is the **area** of the parallelogram formed by the matrix's columns. The matrix stretches or shrinks area by this factor.
-- When **det = 0**, the parallelogram collapses to a line — the matrix is not invertible, and the system of equations from Chapter 1 has no unique solution. This closes the loop between algebra and geometry.
+- When **det = 0**, the parallelogram collapses to a line — the matrix is not invertible, and the system of equations from Chapter 1 has no unique solution. This connects algebra and geometry quite nicely! 
 :::minor
 - Positive determinant = orientation preserved (counterclockwise). Negative = flipped (clockwise).
-- Every rotation matrix has determinant 1 — rotations preserve area exactly.
+- Every pure rotation matrix has determinant 1 — rotations preserve area exactly, they don't stretch anything.
 - A reflection matrix has determinant −1 — same area, flipped orientation.
 :::end
